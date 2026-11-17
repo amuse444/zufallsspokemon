@@ -55,7 +55,7 @@
     <!-- メインコンテンツ -->
     <main class="w-full max-w-xl mx-auto px-4 py-6 flex-grow">
         
-        <!-- シークレットモード稼働中表示（必要に応じて） -->
+        <!-- ステルスモード稼働中表示 -->
         <div id="secret-status-bar" class="hidden mb-3 text-center bg-gray-900 text-white text-xs py-1 px-2 rounded flex items-center justify-between">
             <span>ステルスモードがオンになっています (固定: <span id="fixed-target-name">なし</span>)</span>
             <button onclick="resetSecretMode()" class="underline text-yellow-300 ml-2">解除</button>
@@ -78,9 +78,7 @@
                 <button onclick="toggleDropdown('gen')" id="btn-gen" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
                     世代 ▾
                 </button>
-                <div id="dropdown-gen" class="hidden absolute left-0 mt-1 w-52 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm">
-                    <!-- JS生成 -->
-                </div>
+                <div id="dropdown-gen" class="hidden absolute left-0 mt-1 w-52 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
             </div>
 
             <!-- タイプドロップダウン -->
@@ -88,9 +86,7 @@
                 <button onclick="toggleDropdown('type')" id="btn-type" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
                     タイプ ▾
                 </button>
-                <div id="dropdown-type" class="hidden absolute left-0 mt-1 w-48 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm max-h-60 overflow-y-auto">
-                    <!-- JS生成 -->
-                </div>
+                <div id="dropdown-type" class="hidden absolute left-0 mt-1 w-48 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm max-h-60 overflow-y-auto"></div>
             </div>
 
             <!-- 名前ドロップダウン -->
@@ -98,22 +94,17 @@
                 <button onclick="toggleDropdown('name')" id="btn-name" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
                     名前 ▾
                 </button>
-                <div id="dropdown-name" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm">
-                    <!-- JS生成 -->
-                </div>
+                <div id="dropdown-name" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
             </div>
         </div>
 
         <!-- コントロール群 (2段目: 進化, ナンバー) -->
         <div class="flex flex-wrap items-center gap-2 mb-5">
-            <!-- 進化ドロップダウン -->
             <div class="relative">
                 <button onclick="toggleDropdown('evo')" id="btn-evo" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
                     進化 ▾
                 </button>
-                <div id="dropdown-evo" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm">
-                    <!-- JS生成 -->
-                </div>
+                <div id="dropdown-evo" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
             </div>
 
             <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs cursor-pointer select-none">
@@ -131,22 +122,16 @@
         </div>
 
         <!-- 中央広告エリア (発生ボタン直下) -->
-        <div id="ad-mid-container" class="w-full mb-8 bg-[#f3f4f6] border border-gray-200">
-            <!-- JSで描画 -->
-        </div>
+        <div id="ad-mid-container" class="w-full mb-8 bg-[#f3f4f6] border border-gray-200"></div>
 
         <!-- 結果表示エリア -->
-        <div id="result-container" class="mt-4 hidden">
-            <!-- ポケモン画像やテキストがここに表示される -->
-        </div>
+        <div id="result-container" class="mt-4 hidden"></div>
 
     </main>
 
     <!-- フッター広告＆リンクエリア -->
     <footer class="w-full bg-[#f9fafb] border-t border-gray-200 pt-4 pb-8 mt-12">
         <div class="max-w-xl mx-auto px-4 text-center">
-            
-            <!-- 多言語リンク -->
             <div class="text-[11px] text-[#0070f3] flex flex-wrap justify-center gap-x-2 gap-y-1 mb-3">
                 <a href="#" onclick="return false;">Deutsch</a>
                 <a href="#" onclick="return false;">English</a>
@@ -157,36 +142,25 @@
                 <a href="#" onclick="return false;">中文</a>
                 <a href="#" onclick="return false;">한국어</a>
             </div>
-
-            <!-- 規約リンク -->
             <div class="text-[11px] text-[#0070f3] flex flex-wrap justify-center gap-x-3 mb-6">
-                <a href="#" onclick="return false;">使い方</a>
-                <span>–</span>
-                <a href="#" onclick="return false;">Contact us</a>
-                <span>–</span>
-                <a href="#" onclick="return false;">Legal Notice</a>
-                <span>–</span>
+                <a href="#" onclick="return false;">使い方</a><span>–</span>
+                <a href="#" onclick="return false;">Contact us</a><span>–</span>
+                <a href="#" onclick="return false;">Legal Notice</a><span>–</span>
                 <a href="#" onclick="return false;">Privacy Policy</a>
             </div>
-
-            <!-- 最下部広告スロット (商用タイポグラフィバナー) -->
-            <div id="ad-bottom-container" class="w-full">
-                <!-- JSで描画 -->
-            </div>
+            <div id="ad-bottom-container" class="w-full"></div>
         </div>
     </footer>
 
-    <!-- シークレット設定モーダル (タイトル3回タップで出現) -->
+    <!-- シークレット設定モーダル -->
     <div id="secret-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold mb-3 text-gray-800">🕵️ ステルス仕込み設定</h3>
-            <p class="text-xs text-gray-500 mb-4">次に発生させるポケモンを直接指定できます（空欄にすれば完全ランダム）。</p>
-            
+            <p class="text-xs text-gray-500 mb-4">次に発生させるポケモンを直接指定できます。</p>
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-700 mb-1">強制出現させるポケモン名（例: ピカチュウ、リザードン、ガケガニ）:</label>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">強制出現させるポケモン名（例: ピカチュウ、リザードン）:</label>
                 <input type="text" id="secret-input-name" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="例: ピカチュウ">
             </div>
-
             <div class="flex justify-end gap-2">
                 <button onclick="closeSecretModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded text-sm font-medium">キャンセル</button>
                 <button onclick="applySecretSetting()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">適用する</button>
@@ -195,7 +169,7 @@
     </div>
 
     <script>
-        // --- 簡易ポケモンデータプール (代表例) ---
+        // ポケモンデータプール（公式アートワークの図鑑ID紐付け）
         const POKEMON_DB = [
             { id: 1, name: "フシギダネ", type: "くさ/どく", gen: 1 },
             { id: 6, name: "リザードン", type: "ほのお/ひこう", gen: 1 },
@@ -214,7 +188,6 @@
             { id: 1025, name: "モモワロウ", type: "どく/ゴースト", gen: 9 }
         ];
 
-        // 御三家最終・準伝説・伝説プール（最初の2回用）
         const PREMIUM_POOL = [
             { id: 6, name: "リザードン", type: "ほのお/ひこう", gen: 1 },
             { id: 150, name: "ミュウツー", type: "エスパー", gen: 1 },
@@ -223,7 +196,6 @@
             { id: 1025, name: "モモワロウ", type: "どく/ゴースト", gen: 9 }
         ];
 
-        // 広告バリエーションプール
         const TOP_AD_POOL = [
             { title1: "あおぎり高校の求人情報", sub1: "求人一覧", title2: "カバー vtuberの求人情報", sub2: "求人一覧", app: "求人ボックス", desc: "豊富な求人情報から簡単検索！", cta: "インストール" },
             { title1: "大手優良企業のエンジニア募集", sub1: "リモートワーク可", title2: "未経験からのITキャリア", sub2: "高収入求人特集", app: "doda（デューダ）", desc: "あなたに合った求人が見つかる", cta: "詳細を見る" }
@@ -234,18 +206,15 @@
             { outerBg: '#d9d9d9', innerBg: 'linear-gradient(165deg, #1e1b4b 0%, #312e81 55%, #1e293b 100%)', accentColor: '#fb7185', tag: '無料会員登録キャンペーン', top: '人気マンガ', mid: '今すぐ使える', big: '70%', unit: 'OFF', bottom: 'クーポン配布中', brand: 'コミックシーモア', cta: '無料で読む', note: '※一部対象外の作品があります。' }
         ];
 
-        // 状態変数
-        let remainingPremiumRolls = 2; // 最初2回限定プール
-        let fixedPokemonName = "";     // ステルス個別固定
+        let remainingPremiumRolls = 2;
+        let fixedPokemonName = "";
         let titleTapCount = 0;
         let titleTapTimer = null;
 
-        // 初期化
         window.onload = function() {
             renderAds();
             setupDropdowns();
             
-            // URLパラメータチェック (?fix=ピカチュウ)
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('fix')) {
                 fixedPokemonName = urlParams.get('fix');
@@ -253,7 +222,6 @@
                 document.getElementById('fixed-target-name').innerText = fixedPokemonName;
             }
 
-            // タイトル3回タップ検知
             document.getElementById('main-title').addEventListener('click', function() {
                 titleTapCount++;
                 if(titleTapCount === 1) {
@@ -266,7 +234,6 @@
             });
         };
 
-        // 広告描画関数
         function renderAds() {
             const topAd = TOP_AD_POOL[Math.floor(Math.random() * TOP_AD_POOL.length)];
             document.getElementById('ad-top-container').innerHTML = `
@@ -294,8 +261,6 @@
                     </div>
                 </div>
             `;
-
-            // 中央・下部広告もランダム描画
             document.getElementById('ad-mid-container').innerHTML = document.getElementById('ad-top-container').innerHTML;
 
             const bAd = BOTTOM_AD_POOL[Math.floor(Math.random() * BOTTOM_AD_POOL.length)];
@@ -326,25 +291,20 @@
             `;
         }
 
-        // タイトル上広告タップで「最初の2回プレミアム仕込み」を即座に解除
         function handleTopAdClick() {
             if(remainingPremiumRolls > 0) {
                 remainingPremiumRolls = 0;
-                console.log("プレミアム仕込みが解除されました。");
             }
         }
 
-        // 発生ボタン処理
         function generatePokemon() {
-            // 1. 広告再読み込み＆画面リロード演出
             renderAds();
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // 2. ポケモン決定ロジック
             let chosen;
             if(fixedPokemonName) {
                 chosen = POKEMON_DB.find(p => p.name === fixedPokemonName) || { id: 25, name: fixedPokemonName, type: "???", gen: 1 };
-                fixedPokemonName = ""; // 1回使ったらクリア
+                fixedPokemonName = "";
                 document.getElementById('secret-status-bar').classList.add('hidden');
             } else if(remainingPremiumRolls > 0) {
                 remainingPremiumRolls--;
@@ -353,18 +313,23 @@
                 chosen = POKEMON_DB[Math.floor(Math.random() * POKEMON_DB.length)];
             }
 
-            // 3. 表示反映
             const showImg = document.getElementById('chk-image').checked;
             const showNum = document.getElementById('chk-number').checked;
 
             let html = `<div class="bg-white border border-gray-200 rounded p-4 text-center shadow-sm">`;
+            
+            // ★修正：公式アートワークの画像URLを正しく表示するように変更
             if(showImg) {
-                html += `<div class="w-48 h-48 mx-auto bg-gray-100 rounded flex items-center justify-center mb-3 text-gray-400 text-sm font-bold">[ ${chosen.name} の公式アートワーク ]</div>`;
+                const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${chosen.id}.png`;
+                html += `<div class="w-52 h-52 mx-auto flex items-center justify-center mb-3">
+                    <img src="${imageUrl}" alt="${chosen.name}" class="max-h-full max-w-full object-contain drop-shadow-md" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${chosen.id}.png';">
+                </div>`;
             }
+
             let infoText = "";
             if(showNum) infoText += `#${chosen.id} `;
             infoText += chosen.name;
-            html += `<div class="text-lg font-bold text-gray-800">${infoText}</div>`;
+            html += `<div class="text-xl font-bold text-gray-800">${infoText}</div>`;
             html += `</div>`;
 
             const resContainer = document.getElementById('result-container');
@@ -372,7 +337,6 @@
             resContainer.classList.remove('hidden');
         }
 
-        // ドロップダウン開閉
         function toggleDropdown(type) {
             ['gen', 'type', 'name', 'evo'].forEach(t => {
                 const el = document.getElementById(`dropdown-${t}`);
@@ -385,25 +349,13 @@
         }
 
         function setupDropdowns() {
-            document.getElementById('dropdown-gen').innerHTML = `
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> 第一世代 (#1-151)</label>
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> 第二世代 (#152-251)</label>
-            `;
-            document.getElementById('dropdown-type').innerHTML = `
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべて</label>
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> ほのお</label>
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> みず</label>
-            `;
-            document.getElementById('dropdown-name').innerHTML = `
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="radio" name="lang" checked> 日本語</label>
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="radio" name="lang"> English</label>
-            `;
-            document.getElementById('dropdown-evo').innerHTML = `
-                <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべての進化段階</label>
-            `;
+            document.getElementById('dropdown-gen').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> 第一世代 (#1-151)</label>`;
+            document.getElementById('dropdown-type').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべて</label>`;
+            document.getElementById('dropdown-name').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="radio" name="lang" checked> 日本語</label>`;
+            document.getElementById('dropdown-evo').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべての進化段階</label>`;
         }
 
-        function toggleDisplay(type) { /* リアルタイム切り替え用 */ }
+        function toggleDisplay(type) {}
 
         function openSecretModal() {
             document.getElementById('secret-modal').classList.remove('hidden');
