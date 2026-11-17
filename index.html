@@ -1,381 +1,1937 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポケモンランダム発生器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #ffffff;
-            color: #111827;
-        }
-        /* カスタムチェックボックス（角丸☑️風） */
-        .custom-checkbox {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 1.15rem;
-            height: 1.15rem;
-            border: 2px solid #6b7280;
-            border-radius: 0.25rem;
-            outline: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #fff;
-            transition: all 0.1s ease;
-            position: relative;
-        }
-        .custom-checkbox:checked {
-            background-color: #374151;
-            border-color: #374151;
-        }
-        .custom-checkbox:checked::after {
-            content: "";
-            position: absolute;
-            left: 4px;
-            top: 1px;
-            width: 5px;
-            height: 10px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ポケモンランダム発生器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #333333;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* クラシック明朝体ブルータイトル */
+    .zp-title {
+      font-family: "Hiragino Mincho ProN", "YuMincho", "Yu Mincho", "Noto Serif JP", Georgia, serif;
+      color: #2b6cb0;
+      font-size: 26px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
+      user-select: none;
+    }
+
+    /* 角丸四角チェックボックス（☑️ 形状） */
+    .zp-checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid #9e9e9e;
+      background-color: #ffffff;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+      flex-shrink: 0;
+    }
+
+    .zp-checkbox.checked {
+      background-color: #5a5a5a;
+      border-color: #5a5a5a;
+    }
+
+    .zp-checkbox svg {
+      width: 12px;
+      height: 12px;
+      stroke: #ffffff;
+      stroke-width: 2.6;
+      fill: none;
+      opacity: 0;
+    }
+
+    .zp-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    /* ドロップダウンボタン */
+    .zp-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background-color: #ffffff;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.92rem;
+      color: #333333;
+      cursor: pointer;
+      line-height: 1.3;
+      transition: background-color 0.12s ease;
+    }
+
+    .zp-dropdown-btn.open {
+      background-color: #d6d6d6;
+      border-color: #bdbdbd;
+    }
+
+    /* フローティングドロップダウンメニュー */
+    .zp-popover {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+      padding: 8px 6px;
+      z-index: 60;
+      min-width: 215px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .zp-popover-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-size: 0.92rem;
+      color: #333333;
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .zp-popover-item:hover,
+    .zp-popover-item:active {
+      background-color: #f3f4f6;
+    }
+
+    /* 青色のピル型「発生」ボタン */
+    .zp-generate-btn {
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 9999px;
+      padding: 9px 24px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1.2;
+      transition: background-color 0.15s ease, transform 0.08s ease;
+    }
+
+    .zp-generate-btn:active {
+      background-color: #0062cc;
+      transform: scale(0.97);
+    }
+
+    .zp-generate-btn:disabled {
+      opacity: 0.85;
+      cursor: not-allowed;
+    }
+
+    /* 発生数入力ボックス */
+    .zp-count-input {
+      width: 46px;
+      height: 36px;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #333333;
+      background-color: #ffffff;
+      outline: none;
+    }
+
+    /* 広告スロット（上・中・下） */
+    .ad-slot-top {
+      width: 100%;
+      min-height: 252px;
+      margin-bottom: 18px;
+      transition: opacity 0.14s ease;
+      cursor: pointer;
+    }
+
+    .ad-slot-center {
+      width: 100%;
+      min-height: 268px;
+      margin-top: 24px;
+      margin-bottom: 72px;
+      transition: opacity 0.14s ease;
+    }
+
+    .ad-slot-bottom {
+      width: 100%;
+      min-height: 268px;
+      margin-top: 20px;
+      transition: opacity 0.14s ease;
+    }
+
+    .ad-reloading {
+      opacity: 0;
+    }
+
+    .zp-footer-link {
+      color: #1a73e8;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .zp-footer-link:hover {
+      text-decoration: underline;
+    }
+
+    /* タイプバッジ */
+    .type-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .type-normal   { background-color: #9fa19f; }
+    .type-fire     { background-color: #e62829; }
+    .type-water    { background-color: #2980ef; }
+    .type-electric { background-color: #fac000; color: #222222; }
+    .type-grass    { background-color: #3fa129; }
+    .type-ice      { background-color: #3dcef3; color: #222222; }
+    .type-fighting { background-color: #ff8000; }
+    .type-poison   { background-color: #9141cb; }
+    .type-ground   { background-color: #915121; }
+    .type-flying   { background-color: #81b9ef; color: #222222; }
+    .type-psychic  { background-color: #ef4179; }
+    .type-bug      { background-color: #91a119; }
+    .type-rock     { background-color: #afa981; }
+    .type-ghost    { background-color: #704170; }
+    .type-dragon   { background-color: #5060e1; }
+    .type-dark     { background-color: #624d4e; }
+    .type-steel    { background-color: #60a1b8; }
+    .type-fairy    { background-color: #ef70ef; }
+
+    @keyframes resultReveal {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .result-reveal {
+      animation: resultReveal 0.16s ease-out forwards;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen bg-white text-[#333333]">
 
-    <!-- 上部広告エリア -->
-    <div id="ad-top-container" class="w-full bg-[#f3f4f6] border-b border-gray-200 cursor-pointer" onclick="handleTopAdClick()" title="広告">
-        <!-- JSで描画 -->
-    </div>
+  <!-- メインコンテナ（モバイル最適幅 440px） -->
+  <div class="max-w-[440px] mx-auto px-4 pt-3 pb-16">
 
-    <!-- メインコンテンツ -->
-    <main class="w-full max-w-xl mx-auto px-4 py-6 flex-grow">
-        
-        <!-- ステルスモード稼働中表示 -->
-        <div id="secret-status-bar" class="hidden mb-3 text-center bg-gray-900 text-white text-xs py-1 px-2 rounded flex items-center justify-between">
-            <span>ステルスモードがオンになっています (固定: <span id="fixed-target-name">なし</span>)</span>
-            <button onclick="resetSecretMode()" class="underline text-yellow-300 ml-2">解除</button>
+    <!-- 1. トップ広告スロット（タップでデフォルト2回仕込みを無言解除） -->
+    <div id="ad-top" class="ad-slot-top"></div>
+
+    <!-- 2. タイトル（3回連続タップ or 1.2秒長押しで仕込み起動） -->
+    <header class="mb-4">
+      <h1 id="secret-title-trigger" class="zp-title cursor-pointer">ポケモンランダム発生器</h1>
+    </header>
+
+    <!-- 3. フィルター＆コントロールバー -->
+    <section class="space-y-3.5 select-none">
+
+      <!-- 1段目: 画像チェック + 世代 + タイプ + 名前 -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" id="btn-opt-image" class="inline-flex items-center gap-1.5 mr-1 cursor-pointer bg-transparent border-0 p-0 text-[0.94rem] text-[#333333]">
+          <span id="cb-image" class="zp-checkbox checked">
+            <svg viewBox="0 0 12 12"><polyline points="2.2,6.2 5,9 9.8,3.2"/></svg>
+          </span>
+          <span>画像</span>
+        </button>
+
+        <!-- 世代ドロップダウン -->
+        <div class="relative" id="wrap-gen">
+          <button type="button" id="btn-gen" class="zp-dropdown-btn">
+            <span>世代</span>
+            <span class="text-[10px]">▾</span>
+          </button>
+          <div id="menu-gen" class="zp-popover hidden">
+            <div id="list-gen"></div>
+            <div class="border-t border-gray-200 my-1"></div>
+            <div id="btn-gen-all" class="zp-popover-item">
+              <span id="cb-gen-all" class="zp-checkbox checked">
+                <svg viewBox="0 0 12 12"><polyline points="2.2,6.2 5,9 9.8,3.2"/></svg>
+              </span>
+              <span>全選択/全解除</span>
+            </div>
+          </div>
         </div>
 
-        <!-- タイトル -->
-        <h1 id="main-title" class="text-2xl font-serif text-[#1e3a8a] mb-5 select-none cursor-pointer" title="ポケモンランダム発生器">
-            ポケモンランダム発生器
-        </h1>
-
-        <!-- コントロール群 (1段目: 画像, 世代, タイプ, 名前) -->
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs cursor-pointer select-none">
-                <input type="checkbox" id="chk-image" class="custom-checkbox" checked onchange="toggleDisplay('image')">
-                <span class="text-gray-800 font-medium">画像</span>
-            </label>
-
-            <!-- 世代ドロップダウン -->
-            <div class="relative">
-                <button onclick="toggleDropdown('gen')" id="btn-gen" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
-                    世代 ▾
-                </button>
-                <div id="dropdown-gen" class="hidden absolute left-0 mt-1 w-52 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
+        <!-- タイプドロップダウン -->
+        <div class="relative" id="wrap-type">
+          <button type="button" id="btn-type" class="zp-dropdown-btn">
+            <span>タイプ</span>
+            <span class="text-[10px]">▾</span>
+          </button>
+          <div id="menu-type" class="zp-popover hidden">
+            <div id="list-type"></div>
+            <div class="border-t border-gray-200 my-1"></div>
+            <div id="btn-type-all" class="zp-popover-item">
+              <span id="cb-type-all" class="zp-checkbox checked">
+                <svg viewBox="0 0 12 12"><polyline points="2.2,6.2 5,9 9.8,3.2"/></svg>
+              </span>
+              <span>全選択/全解除</span>
             </div>
-
-            <!-- タイプドロップダウン -->
-            <div class="relative">
-                <button onclick="toggleDropdown('type')" id="btn-type" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
-                    タイプ ▾
-                </button>
-                <div id="dropdown-type" class="hidden absolute left-0 mt-1 w-48 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm max-h-60 overflow-y-auto"></div>
-            </div>
-
-            <!-- 名前ドロップダウン -->
-            <div class="relative">
-                <button onclick="toggleDropdown('name')" id="btn-name" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
-                    名前 ▾
-                </button>
-                <div id="dropdown-name" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
-            </div>
+          </div>
         </div>
 
-        <!-- コントロール群 (2段目: 進化, ナンバー) -->
-        <div class="flex flex-wrap items-center gap-2 mb-5">
-            <div class="relative">
-                <button onclick="toggleDropdown('evo')" id="btn-evo" class="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs flex items-center gap-1 text-gray-700">
-                    進化 ▾
-                </button>
-                <div id="dropdown-evo" class="hidden absolute left-0 mt-1 w-44 bg-white border border-gray-300 rounded shadow-lg z-20 py-1 text-sm"></div>
-            </div>
+        <!-- 名前言語ドロップダウン -->
+        <div class="relative" id="wrap-name">
+          <button type="button" id="btn-name" class="zp-dropdown-btn">
+            <span>名前</span>
+            <span class="text-[10px]">▾</span>
+          </button>
+          <div id="menu-name" class="zp-popover hidden" style="right: 0; left: auto; min-width: 155px;">
+            <div id="list-name"></div>
+          </div>
+        </div>
+      </div>
 
-            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded text-sm shadow-xs cursor-pointer select-none">
-                <input type="checkbox" id="chk-number" class="custom-checkbox" checked onchange="toggleDisplay('number')">
-                <span class="text-gray-800 font-medium">ナンバー</span>
-            </label>
+      <!-- 2段目: 進化 + ナンバーチェック -->
+      <div class="flex items-center gap-3">
+        <div class="relative" id="wrap-evo">
+          <button type="button" id="btn-evo" class="zp-dropdown-btn">
+            <span>進化</span>
+            <span class="text-[10px]">▾</span>
+          </button>
+          <div id="menu-evo" class="zp-popover hidden" style="min-width: 165px;">
+            <div id="list-evo"></div>
+          </div>
         </div>
 
-        <!-- 3段目: 発生ボタン ＆ カウント -->
-        <div class="flex items-center gap-3 mb-8">
-            <button onclick="generatePokemon()" class="bg-[#0070f3] hover:bg-[#0051a2] text-white font-bold px-6 py-2 rounded-full shadow-sm transition-colors text-sm">
-                発生
-            </button>
-            <input type="number" id="gen-count" value="1" min="1" max="10" class="w-14 px-2 py-1.5 text-center border border-gray-300 rounded text-sm bg-white">
-        </div>
+        <button type="button" id="btn-opt-number" class="inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-[0.94rem] text-[#333333]">
+          <span id="cb-number" class="zp-checkbox checked">
+            <svg viewBox="0 0 12 12"><polyline points="2.2,6.2 5,9 9.8,3.2"/></svg>
+          </span>
+          <span>ナンバー</span>
+        </button>
+      </div>
 
-        <!-- 中央広告エリア (発生ボタン直下) -->
-        <div id="ad-mid-container" class="w-full mb-8 bg-[#f3f4f6] border border-gray-200"></div>
+      <!-- 3段目: 発生ボタン + 個数ボックス -->
+      <div class="flex items-center gap-2.5 pt-1">
+        <button type="button" id="btn-generate" class="zp-generate-btn">発生</button>
+        <input type="number" id="input-count" value="1" min="1" max="6" class="zp-count-input" aria-label="発生数">
+      </div>
+    </section>
 
-        <!-- 結果表示エリア -->
-        <div id="result-container" class="mt-4 hidden"></div>
+    <!-- 4. 中央広告スロット -->
+    <div id="ad-mid" class="ad-slot-center"></div>
 
-    </main>
+    <!-- エラー・注意メッセージ -->
+    <div id="notice-box" class="hidden mb-4 px-3 py-2 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center"></div>
 
-    <!-- フッター広告＆リンクエリア -->
-    <footer class="w-full bg-[#f9fafb] border-t border-gray-200 pt-4 pb-8 mt-12">
-        <div class="max-w-xl mx-auto px-4 text-center">
-            <div class="text-[11px] text-[#0070f3] flex flex-wrap justify-center gap-x-2 gap-y-1 mb-3">
-                <a href="#" onclick="return false;">Deutsch</a>
-                <a href="#" onclick="return false;">English</a>
-                <a href="#" onclick="return false;">Français</a>
-                <a href="#" onclick="return false;">Español</a>
-                <a href="#" onclick="return false;">Português</a>
-                <a href="#" onclick="return false;">Italiano</a>
-                <a href="#" onclick="return false;">中文</a>
-                <a href="#" onclick="return false;">한국어</a>
-            </div>
-            <div class="text-[11px] text-[#0070f3] flex flex-wrap justify-center gap-x-3 mb-6">
-                <a href="#" onclick="return false;">使い方</a><span>–</span>
-                <a href="#" onclick="return false;">Contact us</a><span>–</span>
-                <a href="#" onclick="return false;">Legal Notice</a><span>–</span>
-                <a href="#" onclick="return false;">Privacy Policy</a>
-            </div>
-            <div id="ad-bottom-container" class="w-full"></div>
-        </div>
+    <!-- 5. 発生結果表示エリア -->
+    <section id="result-area" class="mt-10 mb-16 min-h-[160px]"></section>
+
+    <!-- 6. フッター -->
+    <footer class="mt-10 pt-2 text-[0.82rem] leading-relaxed select-none">
+      <div class="flex flex-wrap gap-x-2 gap-y-1 mb-2" id="footer-langs">
+        <a data-lang="de" class="zp-footer-link">Deutsch</a>
+        <a data-lang="en" class="zp-footer-link">English</a>
+        <a data-lang="fr" class="zp-footer-link">Français</a>
+        <a data-lang="es" class="zp-footer-link">Español</a>
+        <a data-lang="pt" class="zp-footer-link">Português</a>
+        <a data-lang="it" class="zp-footer-link">Italiano</a>
+        <a data-lang="zh" class="zp-footer-link">中文</a>
+        <a data-lang="ko" class="zp-footer-link">한국어</a>
+      </div>
+      <div class="text-[#333333]">
+        <a data-info="usage" class="zp-footer-link">使い方</a>
+        <span class="mx-1">–</span>
+        <a data-info="contact" class="zp-footer-link">Contact us</a>
+        <span class="mx-1">–</span>
+        <a data-info="legal" class="zp-footer-link">Legal Notice</a>
+        <span class="mx-1">–</span>
+        <a data-info="privacy" class="zp-footer-link">Privacy Policy</a>
+      </div>
     </footer>
 
-    <!-- シークレット設定モーダル -->
-    <div id="secret-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold mb-3 text-gray-800">🕵️ ステルス仕込み設定</h3>
-            <p class="text-xs text-gray-500 mb-4">次に発生させるポケモンを直接指定できます。</p>
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-700 mb-1">強制出現させるポケモン名（例: ピカチュウ、リザードン）:</label>
-                <input type="text" id="secret-input-name" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="例: ピカチュウ">
-            </div>
-            <div class="flex justify-end gap-2">
-                <button onclick="closeSecretModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded text-sm font-medium">キャンセル</button>
-                <button onclick="applySecretSetting()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">適用する</button>
-            </div>
+    <!-- 7. フッター下部広告スロット（洗練された商用タイポグラフィバナーのみ） -->
+    <div id="ad-bottom" class="ad-slot-bottom"></div>
+
+  </div>
+
+  <!-- ポケモン図鑑詳細モーダル -->
+  <div id="detail-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-5 shadow-2xl border border-gray-200" onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between pb-2.5 border-b border-gray-200">
+        <div>
+          <span id="detail-dex-num" class="text-xs font-mono text-gray-500">#000</span>
+          <h3 id="detail-poke-name" class="text-lg font-bold text-[#2b6cb0]">ポケモン名</h3>
+          <p id="detail-alt-names" class="text-[11px] text-gray-400 mt-0.5">-</p>
         </div>
+        <button type="button" id="btn-close-detail" class="text-gray-400 hover:text-gray-700 text-xl font-bold px-1 cursor-pointer">&times;</button>
+      </div>
+
+      <div class="py-3 flex flex-col items-center">
+        <div class="flex gap-2 mb-2">
+          <button type="button" id="btn-detail-normal" class="px-3 py-1 text-xs font-semibold rounded-full bg-[#5a5a5a] text-white cursor-pointer">通常</button>
+          <button type="button" id="btn-detail-shiny" class="px-3 py-1 text-xs font-semibold rounded-full bg-white text-gray-700 border border-gray-300 cursor-pointer">色違い</button>
+        </div>
+        <img id="detail-artwork" src="" alt="" class="w-40 h-40 object-contain my-1">
+        <div id="detail-types" class="flex gap-1.5 mt-2"></div>
+      </div>
+
+      <div class="bg-gray-50 rounded-lg p-3 text-xs text-gray-700 space-y-2 border border-gray-100">
+        <p id="detail-flavor" class="leading-relaxed">-</p>
+        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200 text-center">
+          <div>
+            <span class="block text-[10px] text-gray-400">分類</span>
+            <span id="detail-genus" class="font-semibold">-</span>
+          </div>
+          <div>
+            <span class="block text-[10px] text-gray-400">高さ</span>
+            <span id="detail-height" class="font-semibold">-</span>
+          </div>
+          <div>
+            <span class="block text-[10px] text-gray-400">重さ</span>
+            <span id="detail-weight" class="font-semibold">-</span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ポケモンデータプール（公式アートワークの図鑑ID紐付け）
-        const POKEMON_DB = [
-            { id: 1, name: "フシギダネ", type: "くさ/どく", gen: 1 },
-            { id: 6, name: "リザードン", type: "ほのお/ひこう", gen: 1 },
-            { id: 25, name: "ピカチュウ", type: "でんき", gen: 1 },
-            { id: 150, name: "ミュウツー", type: "エスパー", gen: 1 },
-            { id: 149, name: "カイリュー", type: "ドラゴン/ひこう", gen: 1 },
-            { id: 254, name: "ジュカイン", type: "くさ", gen: 3 },
-            { id: 384, name: "レックウザ", type: "ドラゴン/ひこう", gen: 3 },
-            { id: 493, name: "アルセウス", type: "ノーマル", gen: 4 },
-            { id: 658, name: "ゲッコウガ", type: "みず/あく", gen: 6 },
-            { id: 879, name: "ダイオウドウ", type: "はがね", gen: 8 },
-            { id: 905, name: "ラブトロス", type: "フェアリー/ひこう", gen: 8 },
-            { id: 950, name: "ガケガニ", type: "いわ", gen: 9 },
-            { id: 998, name: "セグレイブ", type: "ドラゴン/こおり", gen: 9 },
-            { id: 1000, name: "サーフゴー", type: "はがね/ゴースト", gen: 9 },
-            { id: 1025, name: "モモワロウ", type: "どく/ゴースト", gen: 9 }
-        ];
+  <!-- フッター情報モーダル -->
+  <div id="info-modal" class="fixed inset-0 bg-black/45 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-5 shadow-xl border border-gray-200" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-gray-200">
+        <h3 id="info-modal-title" class="font-bold text-base text-[#2b6cb0]">使い方</h3>
+        <button type="button" id="btn-close-info" class="text-gray-400 hover:text-gray-700 text-xl font-bold px-1 cursor-pointer">&times;</button>
+      </div>
+      <div id="info-modal-body" class="py-3 text-xs text-gray-700 leading-relaxed space-y-2"></div>
+    </div>
+  </div>
 
-        const PREMIUM_POOL = [
-            { id: 6, name: "リザードン", type: "ほのお/ひこう", gen: 1 },
-            { id: 150, name: "ミュウツー", type: "エスパー", gen: 1 },
-            { id: 384, name: "レックウザ", type: "ドラゴン/ひこう", gen: 3 },
-            { id: 658, name: "ゲッコウガ", type: "みず/あく", gen: 6 },
-            { id: 1025, name: "モモワロウ", type: "どく/ゴースト", gen: 9 }
-        ];
+  <!-- ステルス仕込み設定モーダル（通常時は完全に非表示） -->
+  <div id="secret-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl max-w-sm w-full p-5 shadow-2xl border border-gray-200" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-base text-gray-800">特定ポケモン固定・ステルス設定</h3>
+        <button type="button" id="btn-close-secret" class="text-gray-400 hover:text-gray-700 text-xl font-bold px-2 cursor-pointer">&times;</button>
+      </div>
 
-        const TOP_AD_POOL = [
-            { title1: "あおぎり高校の求人情報", sub1: "求人一覧", title2: "カバー vtuberの求人情報", sub2: "求人一覧", app: "求人ボックス", desc: "豊富な求人情報から簡単検索！", cta: "インストール" },
-            { title1: "大手優良企業のエンジニア募集", sub1: "リモートワーク可", title2: "未経験からのITキャリア", sub2: "高収入求人特集", app: "doda（デューダ）", desc: "あなたに合った求人が見つかる", cta: "詳細を見る" }
-        ];
+      <div class="py-4 space-y-4 text-sm max-h-[75vh] overflow-y-auto">
+        <!-- デフォルト2回限定（御三家最終・準伝・伝説） -->
+        <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-gray-800">最初の2回限定（御三家最終・準伝・伝説）</span>
+            <span id="starter-legend-badge" class="text-xs font-bold text-[#007bff]">ON（残り 2 回）</span>
+          </div>
+          <p class="text-[11px] text-gray-600 mt-1">
+            ※タイトル上の広告タップでも即座に解除（残り0回）になります。
+          </p>
+          <div class="flex gap-2 mt-2">
+            <button type="button" id="btn-reset-starter-legend" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-blue-300 text-[#007bff] rounded cursor-pointer hover:bg-blue-50">
+              残り2回にリセット
+            </button>
+            <button type="button" id="btn-disable-starter-legend" class="px-2.5 py-1 text-[11px] font-bold bg-white border border-gray-300 text-gray-600 rounded cursor-pointer hover:bg-gray-100">
+              解除（0回にする）
+            </button>
+          </div>
+        </div>
 
-        const BOTTOM_AD_POOL = [
-            { outerBg: '#d9d9d9', innerBg: 'linear-gradient(165deg, #0b132b 0%, #1c2541 52%, #090d16 100%)', accentColor: '#f59e0b', tag: 'PR / ネット投票サービス', top: '新規登録で', mid: 'TIPマネー', big: '1,000', unit: '円分', bottom: 'プレゼント', brand: 'TIPSTAR', cta: '詳細を見る', note: '※投票券の購入は20歳になってから。' },
-            { outerBg: '#d9d9d9', innerBg: 'linear-gradient(165deg, #1e1b4b 0%, #312e81 55%, #1e293b 100%)', accentColor: '#fb7185', tag: '無料会員登録キャンペーン', top: '人気マンガ', mid: '今すぐ使える', big: '70%', unit: 'OFF', bottom: 'クーポン配布中', brand: 'コミックシーモア', cta: '無料で読む', note: '※一部対象外の作品があります。' }
-        ];
+        <!-- 個別ポケモン指名固定 -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">個別ポケモン指名固定（日本語名 / 英語名 / 図鑑No.）</label>
+          <div class="relative">
+            <input type="text" id="secret-search-input" placeholder="例: ガケガニ、ピカチュウ、950..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-[#007bff] outline-none">
+            <ul id="secret-suggest-list" class="hidden absolute left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-44 overflow-y-auto z-20"></ul>
+          </div>
+          <div id="secret-status-text" class="mt-1.5 text-xs font-bold text-[#007bff]">
+            個別指名: なし
+          </div>
+        </div>
 
-        let remainingPremiumRolls = 2;
-        let fixedPokemonName = "";
-        let titleTapCount = 0;
-        let titleTapTimer = null;
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1.5">個別指名の回数</label>
+          <div class="space-y-1.5 text-xs">
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="rig-freq" value="once" checked>
+              <span>1回だけ固定（自動解除）</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="rig-freq" value="always">
+              <span>毎回固定</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="rig-freq" value="off">
+              <span>OFF（個別指名なし）</span>
+            </label>
+          </div>
+        </div>
 
-        window.onload = function() {
-            renderAds();
-            setupDropdowns();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('fix')) {
-                fixedPokemonName = urlParams.get('fix');
-                document.getElementById('secret-status-bar').classList.remove('hidden');
-                document.getElementById('fixed-target-name').innerText = fixedPokemonName;
-            }
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">名前の後ろに付ける文字（任意）</label>
+          <input type="text" id="secret-suffix-input" placeholder="例: なし（空欄） または ?" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:border-[#007bff] outline-none">
+        </div>
 
-            document.getElementById('main-title').addEventListener('click', function() {
-                titleTapCount++;
-                if(titleTapCount === 1) {
-                    titleTapTimer = setTimeout(() => { titleTapCount = 0; }, 1200);
-                } else if(titleTapCount >= 3) {
-                    clearTimeout(titleTapTimer);
-                    titleTapCount = 0;
-                    openSecretModal();
-                }
-            });
-        };
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1.5">広告枠の表示モード</label>
+          <div class="space-y-1.5 text-xs">
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="ad-style" value="dummy" checked>
+              <span>ランダム広告表示（デフォルト）</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="ad-style" value="blank">
+              <span>非表示の空白マス</span>
+            </label>
+          </div>
+        </div>
+      </div>
 
-        function renderAds() {
-            const topAd = TOP_AD_POOL[Math.floor(Math.random() * TOP_AD_POOL.length)];
-            document.getElementById('ad-top-container').innerHTML = `
-                <div class="max-w-xl mx-auto px-4 py-2">
-                    <div class="text-[10px] text-gray-500 text-center mb-1">Advertisement</div>
-                    <div class="bg-white border border-gray-200 p-2.5 rounded shadow-xs space-y-2">
-                        <div class="p-2 bg-blue-50/50 border border-blue-100 rounded">
-                            <div class="text-xs font-bold text-blue-800">${topAd.title1}</div>
-                            <div class="text-[11px] text-blue-600">${topAd.sub1}</div>
-                        </div>
-                        <div class="p-2 bg-blue-50/50 border border-blue-100 rounded">
-                            <div class="text-xs font-bold text-blue-800">${topAd.title2}</div>
-                            <div class="text-[11px] text-blue-600">${topAd.sub2}</div>
-                        </div>
-                        <div class="flex items-center justify-between pt-1">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">求</div>
-                                <div>
-                                    <div class="text-xs font-bold text-gray-800">${topAd.app}</div>
-                                    <div class="text-[10px] text-gray-500">${topAd.desc}</div>
-                                </div>
-                            </div>
-                            <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded">${topAd.cta}</span>
-                        </div>
+      <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+        <button type="button" id="btn-clear-rig" class="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg cursor-pointer">
+          全仕込み解除
+        </button>
+        <button type="button" id="btn-save-rig" class="px-4 py-2 text-xs font-bold text-white bg-[#007bff] hover:bg-blue-600 rounded-lg shadow cursor-pointer">
+          保存して閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 1. マスターデータ定義
+      // =========================================================================
+      const GEN_LIST = [
+        { id: 1, label: '第一世代 (#1-151)', min: 1, max: 151 },
+        { id: 2, label: '第二世代 (#152-251)', min: 152, max: 251 },
+        { id: 3, label: '第三世代 (#252-386)', min: 252, max: 386 },
+        { id: 4, label: '第四世代 (#387-493)', min: 387, max: 493 },
+        { id: 5, label: '第五世代 (#394-649)', min: 494, max: 649 },
+        { id: 6, label: '第六世代 (#650-721)', min: 650, max: 721 },
+        { id: 7, label: '第七世代 (#722-809)', min: 722, max: 809 },
+        { id: 8, label: '第八世代 (#810-905)', min: 810, max: 905 },
+        { id: 9, label: '第九世代 (#906-1025)', min: 906, max: 1025 }
+      ];
+
+      const TYPE_LIST = [
+        { en: 'normal',   ja: 'ノーマル', de: 'Normal',  fr: 'Normal',   es: 'Normal',   pt: 'Normal',   it: 'Normale',  zh: '一般', ko: '노말' },
+        { en: 'fire',     ja: 'ほのお',   de: 'Feuer',   fr: 'Feu',      es: 'Fuego',    pt: 'Fogo',     it: 'Fuoco',    zh: '火',   ko: '불꽃' },
+        { en: 'water',    ja: 'みず',     de: 'Wasser',  fr: 'Eau',      es: 'Agua',     pt: 'Água',     it: 'Acqua',    zh: '水',   ko: '물' },
+        { en: 'electric', ja: 'でんき',   de: 'Elektro', fr: 'Électrik', es: 'Eléctrico',pt: 'Elétrico', it: 'Elettro',  zh: '电',   ko: '전기' },
+        { en: 'grass',    ja: 'くさ',     de: 'Pflanze', fr: 'Plante',   es: 'Planta',   pt: 'Planta',   it: 'Erba',     zh: '草',   ko: '풀' },
+        { en: 'ice',      ja: 'こおり',   de: 'Eis',     fr: 'Glace',    es: 'Hielo',    pt: 'Gelo',     it: 'Ghiaccio', zh: '冰',   ko: '얼음' },
+        { en: 'fighting', ja: 'かくとう', de: 'Kampf',   fr: 'Combat',   es: 'Lucha',    pt: 'Lutador',  it: 'Lotta',    zh: '格斗', ko: '격투' },
+        { en: 'poison',   ja: 'どく',     de: 'Gift',    fr: 'Poison',   es: 'Veneno',   pt: 'Venenoso', it: 'Veleno',   zh: '毒',   ko: '독' },
+        { en: 'ground',   ja: 'じめん',   de: 'Boden',   fr: 'Sol',      es: 'Tierra',   pt: 'Terrestre',it: 'Terra',    zh: '地面', ko: '땅' },
+        { en: 'flying',   ja: 'ひこう',   de: 'Flug',    fr: 'Vol',      es: 'Volador',  pt: 'Voador',   it: 'Volante',  zh: '飞行', ko: '비행' },
+        { en: 'psychic',  ja: 'エスパー', de: 'Psycho',  fr: 'Psy',      es: 'Psíquico', pt: 'Psíquico', it: 'Psico',    zh: '超能力',ko: '에스퍼' },
+        { en: 'bug',      ja: 'むし',     de: 'Käfer',   fr: 'Insecte',  es: 'Bicho',    pt: 'Inseto',   it: 'Coleottero',zh: '虫',  ko: '벌레' },
+        { en: 'rock',     ja: 'いわ',     de: 'Gestein', fr: 'Roche',    es: 'Roca',     pt: 'Pedra',    it: 'Roccia',   zh: '岩石', ko: '바위' },
+        { en: 'ghost',    ja: 'ゴースト', de: 'Geist',   fr: 'Spectre',  es: 'Fantasma', pt: 'Fantasma', it: 'Spettro',  zh: '幽灵', ko: '고스트' },
+        { en: 'dragon',   ja: 'ドラゴン', de: 'Drache',  fr: 'Dragon',   es: 'Dragón',   pt: 'Dragão',   it: 'Drago',    zh: '龙',   ko: '드래곤' },
+        { en: 'dark',     ja: 'あく',     de: 'Unlicht', fr: 'Ténèbres', es: 'Siniestro',pt: 'Sombrio',  it: 'Buio',     zh: '恶',   ko: '악' },
+        { en: 'steel',    ja: 'はがね',   de: 'Stahl',   fr: 'Acier',    es: 'Acero',    pt: 'Aço',      it: 'Acciaio',  zh: '钢',   ko: '강철' },
+        { en: 'fairy',    ja: 'フェアリー',de: 'Fee',    fr: 'Fée',      es: 'Hada',     pt: 'Fada',     it: 'Folletto', zh: '妖精', ko: '페어리' }
+      ];
+
+      const NAME_LANGS = [
+        { key: 'ja', label: '日本語', api: 'ja-Hrkt' },
+        { key: 'en', label: 'English', api: 'en' },
+        { key: 'de', label: 'Deutsch', api: 'de' },
+        { key: 'fr', label: 'Français', api: 'fr' },
+        { key: 'es', label: 'Español', api: 'es' },
+        { key: 'it', label: 'Italiano', api: 'it' },
+        { key: 'zh', label: '中文', api: 'zh-Hans' },
+        { key: 'ko', label: '한국어', api: 'ko' }
+      ];
+
+      const EVO_OPTIONS = [
+        { key: 'all', label: 'すべて' },
+        { key: 'final', label: '最終進化のみ' },
+        { key: 'unevolved', label: '未進化のみ' }
+      ];
+
+      // デフォルト最初の2回限定プール：全世代御三家最終進化・準伝説・伝説
+      const STARTER_FINAL_IDS = [
+        3, 6, 9,       // カントー御三家（フシギバナ・リザードン・カメックス）
+        154, 157, 160, // ジョウト御三家（メガニウム・バクフーン・オーダイル）
+        254, 257, 260, // ホウエン御三家（ジュカイン・バシャーモ・ラグラージ）
+        389, 392, 395, // シンオウ御三家（ドダイトス・ゴウカザル・エンペルト）
+        497, 500, 503, // イッシュ御三家（ジャローダ・エンブオー・ダイケンキ）
+        652, 655, 658, // カロス御三家（ブリガロン・マフォクシー・ゲッコウガ）
+        724, 727, 730, // アローラ御三家（ジュナイパー・ガオガエン・アシレーヌ）
+        812, 815, 818, // ガラル御三家（ゴリランダー・エースバーン・インテレオン）
+        908, 911, 914  // パルデア御三家（マスカーニャ・ラウドボーン・ウェーニバル）
+      ];
+
+      const SUB_LEGENDARY_IDS = [
+        144, 145, 146,           // フリーザー・サンダー・ファイヤー
+        243, 244, 245,           // ライコウ・エンテイ・スイクン
+        377, 378, 379, 380, 381, // レジロック・レジアイス・レジスチル・ラティアス・ラティオス
+        480, 481, 482, 485, 486, 488, // ユクシー・エムリット・アグノム・ヒードラン・レジギガス・クレセリア
+        638, 639, 640, 641, 642, 645, // コバルオン・テラキオン・ビリジオン・トルネロス・ボルトロス・ランドロス
+        785, 786, 787, 788,      // カプ・コケコ・カプ・テテフ・カプ・ブルル・カプ・レヒレ
+        892, 894, 895, 896, 897, // ウーラオス・レジエレキ・レジドラゴ・ブリザポス・レイスポス
+        1001, 1002, 1003, 1004, 1017 // チオンジェン・パオジアン・ディンルー・イーユイ・オーガポン
+      ];
+
+      const LEGENDARY_IDS = [
+        150,                     // ミュウツー
+        249, 250,                // ルギア・ホウオウ
+        382, 383, 384,           // カイオーガ・グラードン・レックウザ
+        483, 484, 487,           // ディアルガ・パルキア・ギラティナ
+        643, 644, 646,           // レシラム・ゼクロム・キュレム
+        716, 717, 718,           // ゼルネアス・イベルタル・ジガルデ
+        791, 792, 800,           // ソルガレオ・ルナアーラ・ネクロズマ
+        888, 889, 890, 898,      // ザシアン・ザマゼンタ・ムゲンダイナ・バドレックス
+        1007, 1008, 1024         // コライドン・ミライドン・テラパゴス
+      ];
+
+      const SPECIAL_DEFAULT_POOL = Array.from(new Set([
+        ...STARTER_FINAL_IDS,
+        ...SUB_LEGENDARY_IDS,
+        ...LEGENDARY_IDS
+      ]));
+
+      // 内蔵ポケモン辞書（検索サジェスト＆即座の日本語ルックアップ用）
+      const BUILTIN_SPECIES = [
+        { id: 1, ja: 'フシギダネ', en: 'Bulbasaur' },
+        { id: 2, ja: 'フシギソウ', en: 'Ivysaur' },
+        { id: 3, ja: 'フシギバナ', en: 'Venusaur' },
+        { id: 4, ja: 'ヒトカゲ', en: 'Charmander' },
+        { id: 5, ja: 'リザード', en: 'Charmeleon' },
+        { id: 6, ja: 'リザードン', en: 'Charizard' },
+        { id: 7, ja: 'ゼニガメ', en: 'Squirtle' },
+        { id: 8, ja: 'カメール', en: 'Wartortle' },
+        { id: 9, ja: 'カメックス', en: 'Blastoise' },
+        { id: 25, ja: 'ピカチュウ', en: 'Pikachu' },
+        { id: 26, ja: 'ライチュウ', en: 'Raichu' },
+        { id: 39, ja: 'プリン', en: 'Jigglypuff' },
+        { id: 52, ja: 'ニャース', en: 'Meowth' },
+        { id: 54, ja: 'コダック', en: 'Psyduck' },
+        { id: 59, ja: 'ウインディ', en: 'Arcanine' },
+        { id: 65, ja: 'フーディン', en: 'Alakazam' },
+        { id: 68, ja: 'カイリキー', en: 'Machamp' },
+        { id: 94, ja: 'ゲンガー', en: 'Gengar' },
+        { id: 129, ja: 'コイキング', en: 'Magikarp' },
+        { id: 130, ja: 'ギャラドス', en: 'Gyarados' },
+        { id: 131, ja: 'ラプラス', en: 'Lapras' },
+        { id: 132, ja: 'メタモン', en: 'Ditto' },
+        { id: 133, ja: 'イーブイ', en: 'Eevee' },
+        { id: 134, ja: 'シャワーズ', en: 'Vaporeon' },
+        { id: 135, ja: 'サンダース', en: 'Jolteon' },
+        { id: 136, ja: 'ブースター', en: 'Flareon' },
+        { id: 143, ja: 'カビゴン', en: 'Snorlax' },
+        { id: 144, ja: 'フリーザー', en: 'Articuno' },
+        { id: 145, ja: 'サンダー', en: 'Zapdos' },
+        { id: 146, ja: 'ファイヤー', en: 'Moltres' },
+        { id: 149, ja: 'カイリュー', en: 'Dragonite' },
+        { id: 150, ja: 'ミュウツー', en: 'Mewtwo' },
+        { id: 151, ja: 'ミュウ', en: 'Mew' },
+        { id: 152, ja: 'チコリータ', en: 'Chikorita' },
+        { id: 154, ja: 'メガニウム', en: 'Meganium' },
+        { id: 155, ja: 'ヒノアラシ', en: 'Cyndaquil' },
+        { id: 157, ja: 'バクフーン', en: 'Typhlosion' },
+        { id: 158, ja: 'ワニノコ', en: 'Totodile' },
+        { id: 160, ja: 'オーダイル', en: 'Feraligatr' },
+        { id: 172, ja: 'ピチュー', en: 'Pichu' },
+        { id: 175, ja: 'トゲピー', en: 'Togepi' },
+        { id: 196, ja: 'エーフィ', en: 'Espeon' },
+        { id: 197, ja: 'ブラッキー', en: 'Umbreon' },
+        { id: 212, ja: 'ハッサム', en: 'Scizor' },
+        { id: 243, ja: 'ライコウ', en: 'Raikou' },
+        { id: 244, ja: 'エンテイ', en: 'Entei' },
+        { id: 245, ja: 'スイクン', en: 'Suicune' },
+        { id: 248, ja: 'バンギラス', en: 'Tyranitar' },
+        { id: 249, ja: 'ルギア', en: 'Lugia' },
+        { id: 250, ja: 'ホウオウ', en: 'Ho-Oh' },
+        { id: 251, ja: 'セレビィ', en: 'Celebi' },
+        { id: 252, ja: 'キモリ', en: 'Treecko' },
+        { id: 254, ja: 'ジュカイン', en: 'Sceptile' },
+        { id: 255, ja: 'アチャモ', en: 'Torchic' },
+        { id: 257, ja: 'バシャーモ', en: 'Blaziken' },
+        { id: 258, ja: 'ミズゴロウ', en: 'Mudkip' },
+        { id: 260, ja: 'ラグラージ', en: 'Swampert' },
+        { id: 282, ja: 'サーナイト', en: 'Gardevoir' },
+        { id: 302, ja: 'ヤミラミ', en: 'Sableye' },
+        { id: 306, ja: 'ボスゴドラ', en: 'Aggron' },
+        { id: 330, ja: 'フライゴン', en: 'Flygon' },
+        { id: 350, ja: 'ミロカロス', en: 'Milotic' },
+        { id: 373, ja: 'ボーマンダ', en: 'Salamence' },
+        { id: 376, ja: 'メタグロス', en: 'Metagross' },
+        { id: 377, ja: 'レジロック', en: 'Regirock' },
+        { id: 378, ja: 'レジアイス', en: 'Regice' },
+        { id: 379, ja: 'レジスチル', en: 'Registeel' },
+        { id: 380, ja: 'ラティアス', en: 'Latias' },
+        { id: 381, ja: 'ラティオス', en: 'Latios' },
+        { id: 382, ja: 'カイオーガ', en: 'Kyogre' },
+        { id: 383, ja: 'グラードン', en: 'Groudon' },
+        { id: 384, ja: 'レックウザ', en: 'Rayquaza' },
+        { id: 385, ja: 'ジラーチ', en: 'Jirachi' },
+        { id: 386, ja: 'デオキシス', en: 'Deoxys' },
+        { id: 387, ja: 'ナエトル', en: 'Turtwig' },
+        { id: 389, ja: 'ドダイトス', en: 'Torterra' },
+        { id: 390, ja: 'ヒコザル', en: 'Chimchar' },
+        { id: 392, ja: 'ゴウカザル', en: 'Infernape' },
+        { id: 393, ja: 'ポッチャマ', en: 'Piplup' },
+        { id: 395, ja: 'エンペルト', en: 'Empoleon' },
+        { id: 445, ja: 'ガブリアス', en: 'Garchomp' },
+        { id: 448, ja: 'ルカリオ', en: 'Lucario' },
+        { id: 470, ja: 'リーフィア', en: 'Leafeon' },
+        { id: 471, ja: 'グレイシア', en: 'Glaceon' },
+        { id: 480, ja: 'ユクシー', en: 'Uxie' },
+        { id: 481, ja: 'エムリット', en: 'Mesprit' },
+        { id: 482, ja: 'アグノム', en: 'Azelf' },
+        { id: 483, ja: 'ディアルガ', en: 'Dialga' },
+        { id: 484, ja: 'パルキア', en: 'Palkia' },
+        { id: 485, ja: 'ヒードラン', en: 'Heatran' },
+        { id: 486, ja: 'レジギガス', en: 'Regigigas' },
+        { id: 487, ja: 'ギラティナ', en: 'Giratina' },
+        { id: 488, ja: 'クレセリア', en: 'Cresselia' },
+        { id: 491, ja: 'ダークライ', en: 'Darkrai' },
+        { id: 493, ja: 'アルセウス', en: 'Arceus' },
+        { id: 495, ja: 'ツタージャ', en: 'Snivy' },
+        { id: 497, ja: 'ジャローダ', en: 'Serperior' },
+        { id: 498, ja: 'ポカブ', en: 'Tepig' },
+        { id: 500, ja: 'エンブオー', en: 'Emboar' },
+        { id: 501, ja: 'ミジュマル', en: 'Oshawott' },
+        { id: 503, ja: 'ダイケンキ', en: 'Samurott' },
+        { id: 571, ja: 'ゾロアーク', en: 'Zoroark' },
+        { id: 609, ja: 'シャンデラ', en: 'Chandelure' },
+        { id: 612, ja: 'オノノクス', en: 'Haxorus' },
+        { id: 635, ja: 'サザンドラ', en: 'Hydreigon' },
+        { id: 637, ja: 'ウルガモス', en: 'Volcarona' },
+        { id: 638, ja: 'コバルオン', en: 'Cobalion' },
+        { id: 639, ja: 'テラキオン', en: 'Terrakion' },
+        { id: 640, ja: 'ビリジオン', en: 'Virizion' },
+        { id: 641, ja: 'トルネロス', en: 'Tornadus' },
+        { id: 642, ja: 'ボルトロス', en: 'Thundurus' },
+        { id: 643, ja: 'レシラム', en: 'Reshiram' },
+        { id: 644, ja: 'ゼクロム', en: 'Zekrom' },
+        { id: 645, ja: 'ランドロス', en: 'Landorus' },
+        { id: 646, ja: 'キュレム', en: 'Kyurem' },
+        { id: 650, ja: 'ハリマロン', en: 'Chespin' },
+        { id: 652, ja: 'ブリガロン', en: 'Chesnaught' },
+        { id: 653, ja: 'フォッコ', en: 'Fennekin' },
+        { id: 655, ja: 'マフォクシー', en: 'Delphox' },
+        { id: 656, ja: 'ケロマツ', en: 'Froakie' },
+        { id: 658, ja: 'ゲッコウガ', en: 'Greninja' },
+        { id: 700, ja: 'ニンフィア', en: 'Sylveon' },
+        { id: 716, ja: 'ゼルネアス', en: 'Xerneas' },
+        { id: 717, ja: 'イベルタル', en: 'Yveltal' },
+        { id: 718, ja: 'ジガルデ', en: 'Zygarde' },
+        { id: 722, ja: 'モクロー', en: 'Rowlet' },
+        { id: 724, ja: 'ジュナイパー', en: 'Decidueye' },
+        { id: 725, ja: 'ニャビー', en: 'Litten' },
+        { id: 727, ja: 'ガオガエン', en: 'Incineroar' },
+        { id: 728, ja: 'アシマリ', en: 'Popplio' },
+        { id: 730, ja: 'アシレーヌ', en: 'Primarina' },
+        { id: 778, ja: 'ミミッキュ', en: 'Mimikyu' },
+        { id: 785, ja: 'カプ・コケコ', en: 'Tapu Koko' },
+        { id: 786, ja: 'カプ・テテフ', en: 'Tapu Lele' },
+        { id: 787, ja: 'カプ・ブルル', en: 'Tapu Bulu' },
+        { id: 788, ja: 'カプ・レヒレ', en: 'Tapu Fini' },
+        { id: 791, ja: 'ソルガレオ', en: 'Solgaleo' },
+        { id: 792, ja: 'ルナアーラ', en: 'Lunala' },
+        { id: 800, ja: 'ネクロズマ', en: 'Necrozma' },
+        { id: 810, ja: 'サルノリ', en: 'Grookey' },
+        { id: 812, ja: 'ゴリランダー', en: 'Rillaboom' },
+        { id: 813, ja: 'ヒバニー', en: 'Scorbunny' },
+        { id: 815, ja: 'エースバーン', en: 'Cinderace' },
+        { id: 816, ja: 'メッソン', en: 'Sobble' },
+        { id: 818, ja: 'インテレオン', en: 'Inteleon' },
+        { id: 879, ja: 'ダイオウドウ', en: 'Copperajah' },
+        { id: 887, ja: 'ドラパルト', en: 'Dragapult' },
+        { id: 888, ja: 'ザシアン', en: 'Zacian' },
+        { id: 889, ja: 'ザマゼンタ', en: 'Zamazenta' },
+        { id: 890, ja: 'ムゲンダイナ', en: 'Eternatus' },
+        { id: 892, ja: 'ウーラオス', en: 'Urshifu' },
+        { id: 894, ja: 'レジエレキ', en: 'Regieleki' },
+        { id: 895, ja: 'レジドラゴ', en: 'Regidrago' },
+        { id: 896, ja: 'ブリザポス', en: 'Glastrier' },
+        { id: 897, ja: 'レイスポス', en: 'Spectrier' },
+        { id: 898, ja: 'バドレックス', en: 'Calyrex' },
+        { id: 906, ja: 'ニャオハ', en: 'Sprigatito' },
+        { id: 908, ja: 'マスカーニャ', en: 'Meowscarada' },
+        { id: 909, ja: 'ホゲータ', en: 'Fuecoco' },
+        { id: 911, ja: 'ラウドボーン', en: 'Skeledirge' },
+        { id: 912, ja: 'クワッス', en: 'Quaxly' },
+        { id: 914, ja: 'ウェーニバル', en: 'Quaquaval' },
+        { id: 937, ja: 'ソウブレイズ', en: 'Ceruledge' },
+        { id: 950, ja: 'ガケガニ', en: 'Klawf' },
+        { id: 959, ja: 'デカヌチャン', en: 'Tinkaton' },
+        { id: 987, ja: 'ハバタクカミ', en: 'Flutter Mane' },
+        { id: 998, ja: 'セグレイブ', en: 'Baxcalibur' },
+        { id: 1000, ja: 'サーフゴー', en: 'Gholdengo' },
+        { id: 1001, ja: 'チオンジェン', en: 'Wo-Chien' },
+        { id: 1002, ja: 'パオジアン', en: 'Chien-Pao' },
+        { id: 1003, ja: 'ディンルー', en: 'Ting-Lu' },
+        { id: 1004, ja: 'イーユイ', en: 'Chi-Yu' },
+        { id: 1007, ja: 'コライドン', en: 'Koraidon' },
+        { id: 1008, ja: 'ミライドン', en: 'Miraidon' },
+        { id: 1017, ja: 'オーガポン', en: 'Ogerpon' },
+        { id: 1024, ja: 'テラパゴス', en: 'Terapagos' }
+      ];
+
+      // Google AdSense関連検索＋アプリインストール型広告ユニットプール
+      const ADSENSE_UNIT_POOL = [
+        {
+          links: [
+            { title: 'あおぎり高校の求人情報', sub: '求人一覧' },
+            { title: 'カバー vtuberの求人情報', sub: '求人一覧' }
+          ],
+          appIconBg: '#0ea5e9',
+          appIconTop: '求人',
+          appIconBottom: 'ボックス',
+          appName: '求人ボックス',
+          appDesc: '豊富な求人情報から簡単検索！',
+          appPrice: '無料',
+          cta: 'インストール'
+        },
+        {
+          links: [
+            { title: '未経験OK 在宅ワーク 求人', sub: '詳細を見る' },
+            { title: '高時給 データ入力 バイト', sub: '求人一覧' }
+          ],
+          appIconBg: '#2563eb',
+          appIconTop: 'WORK',
+          appIconBottom: 'NAVI',
+          appName: 'ワークナビ - 求人検索',
+          appDesc: '近くの好条件求人を毎日更新中！',
+          appPrice: '無料',
+          cta: 'インストール'
+        },
+        {
+          links: [
+            { title: 'トレカ 買取 相場 検索', sub: '公式サイト' },
+            { title: 'シングルカード 通販 激安', sub: 'ショップ一覧' }
+          ],
+          appIconBg: '#dc2626',
+          appIconTop: 'CARD',
+          appIconBottom: 'MALL',
+          appName: 'トレカモール公式アプリ',
+          appDesc: '人気カードの最新価格をリアルタイムチェック！',
+          appPrice: '無料',
+          cta: 'インストール'
+        },
+        {
+          links: [
+            { title: 'スマホ RPG 新作 無料ゲーム', sub: '特集ページ' },
+            { title: '人気コミック 無料試し読み一覧', sub: '電子書籍ストア' }
+          ],
+          appIconBg: '#7c3aed',
+          appIconTop: 'BOOK',
+          appIconBottom: 'PLUS',
+          appName: 'ブックプラス - 電子書籍・マンガ',
+          appDesc: '話題のマンガ・ライトノベルを毎日無料で読める！',
+          appPrice: '無料',
+          cta: 'インストール'
+        }
+      ];
+
+      // フッター下部用の洗練された商用縦型ディスプレイバナー広告プール（チープなゲーム風イラスト排除）
+      const BOTTOM_AD_POOL = [
+        {
+          outerBg: '#d9d9d9',
+          innerBg: 'linear-gradient(165deg, #0b132b 0%, #1c2541 52%, #090d16 100%)',
+          accentColor: '#f59e0b',
+          tag: 'PR / ネット投票サービス',
+          headlineTop: '新規登録で',
+          headlineMid: 'TIPマネー',
+          bigText: '1,000',
+          unitText: '円分',
+          headlineBottom: 'プレゼント',
+          brandName: 'TIPSTAR',
+          ctaText: '詳細を見る',
+          disclaimer: '※投票券の購入は20歳になってから。'
+        },
+        {
+          outerBg: '#d9d9d9',
+          innerBg: 'linear-gradient(165deg, #1e1b4b 0%, #312e81 55%, #1e293b 100%)',
+          accentColor: '#fb7185',
+          tag: '無料会員登録キャンペーン',
+          headlineTop: '人気マンガ',
+          headlineMid: '今すぐ使える',
+          bigText: '70%',
+          unitText: 'OFF',
+          headlineBottom: 'クーポン配布中',
+          brandName: 'コミックシーモア',
+          ctaText: '無料で読む',
+          disclaimer: '※一部対象外の作品があります。'
+        },
+        {
+          outerBg: '#d9d9d9',
+          innerBg: 'linear-gradient(165deg, #09090b 0%, #18181b 55%, #0284c7 140%)',
+          accentColor: '#38bdf8',
+          tag: '見放題作品数 No.1',
+          headlineTop: '映画・ドラマ・アニメ',
+          headlineMid: 'まずは無料体験',
+          bigText: '31',
+          unitText: '日間無料',
+          headlineBottom: 'トライアル実施中',
+          brandName: 'U-NEXT',
+          ctaText: '今すぐ体験',
+          disclaimer: '※無料期間中の解約で月額料金は発生しません。'
+        },
+        {
+          outerBg: '#d9d9d9',
+          innerBg: 'linear-gradient(165deg, #7f1d1d 0%, #991b1b 55%, #450a0a 100%)',
+          accentColor: '#fde047',
+          tag: '期間限定ポイントアップ',
+          headlineTop: 'お買い物マラソン',
+          headlineMid: 'ショップ買いまわりで',
+          bigText: '最大10',
+          unitText: '倍',
+          headlineBottom: 'ポイント還元',
+          brandName: '楽天市場',
+          ctaText: 'エントリーはこちら',
+          disclaimer: '※獲得上限ポイント数・条件あり。'
+        }
+      ];
+
+      // =========================================================================
+      // 2. アプリケーション状態 & キャッシュ
+      // =========================================================================
+      const RIG_STORAGE_KEY = 'zp_jp_rig_config_v7';
+
+      const state = {
+        showImage: true,
+        showNumber: true,
+        selectedGens: new Set(GEN_LIST.map(g => g.id)),
+        selectedTypes: new Set(TYPE_LIST.map(t => t.en)),
+        nameLang: 'ja',
+        evoFilter: 'all',
+        openMenu: null,
+        adStyle: 'dummy'
+      };
+
+      // デフォルト仕込み：最初の2回の発生は御三家最終進化・準伝説・伝説からランダム表示
+      let initialSpecialCount = 2;
+
+      let rigConfig = {
+        active: false,
+        id: null,
+        name: '',
+        freq: 'once',
+        suffix: ''
+      };
+
+      let pendingRigCandidate = null;
+      let lastGenerated = [];
+      let currentDetailData = null;
+      const speciesList = [...BUILTIN_SPECIES];
+      const pokemonCache = {};
+      const typeCache = {};
+
+      // =========================================================================
+      // 3. UI描画（チェックボックス・ドロップダウン・広告スロット）
+      // =========================================================================
+      function checkIconSvg() {
+        return '<svg viewBox="0 0 12 12"><polyline points="2.2,6.2 5,9 9.8,3.2"/></svg>';
+      }
+
+      function renderDropdownLists() {
+        const listGen = document.getElementById('list-gen');
+        listGen.innerHTML = GEN_LIST.map(g => {
+          const isChecked = state.selectedGens.has(g.id);
+          return `
+            <div data-gen-id="${g.id}" class="zp-popover-item">
+              <span class="zp-checkbox ${isChecked ? 'checked' : ''}">${checkIconSvg()}</span>
+              <span>${g.label}</span>
+            </div>
+          `;
+        }).join('');
+
+        const cbGenAll = document.getElementById('cb-gen-all');
+        cbGenAll.classList.toggle('checked', state.selectedGens.size === GEN_LIST.length);
+
+        const listType = document.getElementById('list-type');
+        listType.innerHTML = TYPE_LIST.map(t => {
+          const isChecked = state.selectedTypes.has(t.en);
+          return `
+            <div data-type-en="${t.en}" class="zp-popover-item">
+              <span class="zp-checkbox ${isChecked ? 'checked' : ''}">${checkIconSvg()}</span>
+              <span>${t.ja}</span>
+            </div>
+          `;
+        }).join('');
+
+        const cbTypeAll = document.getElementById('cb-type-all');
+        cbTypeAll.classList.toggle('checked', state.selectedTypes.size === TYPE_LIST.length);
+
+        const listName = document.getElementById('list-name');
+        listName.innerHTML = NAME_LANGS.map(l => {
+          const isChecked = state.nameLang === l.key;
+          return `
+            <div data-lang-key="${l.key}" class="zp-popover-item">
+              <span class="zp-checkbox ${isChecked ? 'checked' : ''}">${checkIconSvg()}</span>
+              <span>${l.label}</span>
+            </div>
+          `;
+        }).join('');
+
+        const listEvo = document.getElementById('list-evo');
+        listEvo.innerHTML = EVO_OPTIONS.map(e => {
+          const isChecked = state.evoFilter === e.key;
+          return `
+            <div data-evo-key="${e.key}" class="zp-popover-item">
+              <span class="zp-checkbox ${isChecked ? 'checked' : ''}">${checkIconSvg()}</span>
+              <span>${e.label}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function toggleMenu(menuKey) {
+        const targetMenu = document.getElementById(`menu-${menuKey}`);
+        const targetBtn = document.getElementById(`btn-${menuKey}`);
+        const wasOpen = state.openMenu === menuKey;
+
+        closeAllMenus();
+
+        if (!wasOpen) {
+          targetMenu.classList.remove('hidden');
+          targetBtn.classList.add('open');
+          state.openMenu = menuKey;
+        }
+      }
+
+      function closeAllMenus() {
+        ['gen', 'type', 'name', 'evo'].forEach(key => {
+          const m = document.getElementById(`menu-${key}`);
+          const b = document.getElementById(`btn-${key}`);
+          if (m) m.classList.add('hidden');
+          if (b) b.classList.remove('open');
+        });
+        state.openMenu = null;
+      }
+
+      function buildAdUnitHtml(unit, showHeaderLabel) {
+        return `
+          <div class="mx-auto w-[86%] select-none">
+            ${showHeaderLabel ? '<div class="text-center text-[11px] text-[#555555] mb-1">Advertisement</div>' : ''}
+            <div class="relative bg-[#e4edf5] border border-[#dce6f0] p-2">
+              <div class="absolute top-0.5 right-1 inline-flex items-center gap-1 bg-white/95 px-1 py-0.5 text-[10px] leading-none border border-gray-200">
+                <span style="color:#00aecd; font-weight:bold;">▷</span>
+                <span style="color:#00aecd; font-weight:bold;">×</span>
+              </div>
+
+              <div class="space-y-2 pt-1">
+                ${unit.links.map(link => `
+                  <div class="bg-white border border-[#e5e7eb] px-3 py-2.5">
+                    <div class="text-[0.95rem] font-bold text-[#1a5fb4] underline decoration-1 underline-offset-2 leading-snug">
+                      ${link.title}
                     </div>
-                </div>
-            `;
-            document.getElementById('ad-mid-container').innerHTML = document.getElementById('ad-top-container').innerHTML;
-
-            const bAd = BOTTOM_AD_POOL[Math.floor(Math.random() * BOTTOM_AD_POOL.length)];
-            document.getElementById('ad-bottom-container').innerHTML = `
-                <div class="w-full flex justify-center relative select-none overflow-hidden" style="background-color: ${bAd.outerBg};">
-                    <div class="w-[64%] min-h-[268px] relative flex flex-col justify-between p-4 text-white shadow-sm overflow-hidden" style="background: ${bAd.innerBg};">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-white/15 text-white/90">${bAd.tag}</span>
-                        </div>
-                        <div class="my-2">
-                            <div class="text-[0.95rem] font-bold leading-snug text-white/95">${bAd.top}</div>
-                            <div class="text-[1.1rem] font-extrabold leading-snug mt-0.5" style="color: ${bAd.accentColor};">${bAd.mid}</div>
-                            <div class="flex items-baseline gap-1 mt-1">
-                                <span class="text-[2.45rem] font-black leading-none tracking-tight text-white">${bAd.big}</span>
-                                <span class="text-[1.05rem] font-extrabold text-white/95">${bAd.unit}</span>
-                            </div>
-                            <div class="text-[1.05rem] font-extrabold leading-snug mt-1 text-white">${bAd.bottom}</div>
-                        </div>
-                        <div class="pt-2 border-t border-white/15">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-[0.95rem] font-black tracking-wide text-white">${bAd.brand}</span>
-                                <span class="bg-white text-[#111827] text-[10px] font-bold px-2.5 py-1 rounded-sm shadow-xs flex-shrink-0">${bAd.cta}</span>
-                            </div>
-                            <p class="text-[8px] text-white/65 leading-tight mt-1.5">${bAd.note}</p>
-                        </div>
+                    <div class="text-[0.78rem] text-[#1a5fb4] mt-1">
+                      ${link.sub}
                     </div>
+                  </div>
+                `).join('')}
+              </div>
+
+              <div class="mt-2 bg-white border border-[#e5e7eb] px-2.5 py-2 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-11 h-11 rounded-lg flex flex-col items-center justify-center text-white font-black leading-tight flex-shrink-0 shadow-xs" style="background-color: ${unit.appIconBg};">
+                    <span class="text-[11px]">${unit.appIconTop}</span>
+                    <span class="text-[9px]">${unit.appIconBottom}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[0.82rem] font-bold text-[#222222] truncate">${unit.appName}</div>
+                    <div class="text-[0.68rem] text-[#666666] leading-tight line-clamp-2 mt-0.5">${unit.appDesc}</div>
+                    <div class="text-[0.68rem] text-[#666666] mt-0.5">${unit.appPrice}</div>
+                  </div>
                 </div>
-            `;
+                <span class="bg-[#0b6bcb] text-white text-[0.72rem] font-bold px-2.5 py-1.5 rounded flex-shrink-0">
+                  ${unit.cta}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function buildBottomAdHtml(unit) {
+        return `
+          <div class="w-full flex justify-center relative select-none overflow-hidden" style="background-color: ${unit.outerBg};">
+            <div class="w-[64%] min-h-[268px] relative flex flex-col justify-between p-4 text-white shadow-sm overflow-hidden" style="background: ${unit.innerBg};">
+              <div class="flex items-center justify-between">
+                <span class="text-[9px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-white/15 text-white/90">
+                  ${unit.tag}
+                </span>
+              </div>
+
+              <div class="my-2">
+                <div class="text-[0.95rem] font-bold leading-snug text-white/95">${unit.headlineTop}</div>
+                <div class="text-[1.1rem] font-extrabold leading-snug mt-0.5" style="color: ${unit.accentColor};">${unit.headlineMid}</div>
+                <div class="flex items-baseline gap-1 mt-1">
+                  <span class="text-[2.45rem] font-black leading-none tracking-tight text-white">${unit.bigText}</span>
+                  <span class="text-[1.05rem] font-extrabold text-white/95">${unit.unitText}</span>
+                </div>
+                <div class="text-[1.05rem] font-extrabold leading-snug mt-1 text-white">${unit.headlineBottom}</div>
+              </div>
+
+              <div class="pt-2 border-t border-white/15">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[0.95rem] font-black tracking-wide text-white">${unit.brandName}</span>
+                  <span class="bg-white text-[#111827] text-[10px] font-bold px-2.5 py-1 rounded-sm shadow-xs flex-shrink-0">
+                    ${unit.ctaText}
+                  </span>
+                </div>
+                <p class="text-[8px] text-white/65 leading-tight mt-1.5">${unit.disclaimer}</p>
+              </div>
+            </div>
+            <div class="absolute top-1 right-1 inline-flex items-center gap-0.5 bg-white/90 px-1 py-0.5 text-[10px] leading-none border border-gray-300">
+              <span style="color:#00aecd; font-weight:bold;">▷</span>
+              <span style="color:#00aecd; font-weight:bold;">×</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAds() {
+        const topEl = document.getElementById('ad-top');
+        const midEl = document.getElementById('ad-mid');
+        const botEl = document.getElementById('ad-bottom');
+        if (!topEl || !midEl || !botEl) return;
+
+        if (state.adStyle === 'blank') {
+          topEl.innerHTML = '';
+          midEl.innerHTML = '';
+          botEl.innerHTML = '';
+          return;
         }
 
-        function handleTopAdClick() {
-            if(remainingPremiumRolls > 0) {
-                remainingPremiumRolls = 0;
-            }
+        const topUnit = ADSENSE_UNIT_POOL[Math.floor(Math.random() * ADSENSE_UNIT_POOL.length)];
+        topEl.innerHTML = buildAdUnitHtml(topUnit, true);
+
+        const midUnit = ADSENSE_UNIT_POOL[Math.floor(Math.random() * ADSENSE_UNIT_POOL.length)];
+        midEl.innerHTML = buildAdUnitHtml(midUnit, false);
+
+        const botUnit = BOTTOM_AD_POOL[Math.floor(Math.random() * BOTTOM_AD_POOL.length)];
+        botEl.innerHTML = buildBottomAdHtml(botUnit);
+      }
+
+      // =========================================================================
+      // 4. ポケモン発生＆広告リロード演出
+      // =========================================================================
+      function preloadImage(url) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = url;
+          setTimeout(() => resolve(false), 1200);
+        });
+      }
+
+      async function handleGenerateClick() {
+        closeAllMenus();
+        hideNotice();
+
+        if (state.selectedGens.size === 0 || state.selectedTypes.size === 0) {
+          showNotice('「世代」と「タイプ」をそれぞれ1つ以上選択してください。');
+          return;
         }
 
-        function generatePokemon() {
-            renderAds();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        const countInput = document.getElementById('input-count');
+        let count = parseInt(countInput.value, 10);
+        if (isNaN(count) || count < 1) count = 1;
+        if (count > 6) count = 6;
+        countInput.value = count;
 
-            let chosen;
-            if(fixedPokemonName) {
-                chosen = POKEMON_DB.find(p => p.name === fixedPokemonName) || { id: 25, name: fixedPokemonName, type: "???", gen: 1 };
-                fixedPokemonName = "";
-                document.getElementById('secret-status-bar').classList.add('hidden');
-            } else if(remainingPremiumRolls > 0) {
-                remainingPremiumRolls--;
-                chosen = PREMIUM_POOL[Math.floor(Math.random() * PREMIUM_POOL.length)];
+        const btn = document.getElementById('btn-generate');
+        btn.disabled = true;
+
+        // ボタン文言やスクロール位置は変えず、3つの広告枠のみ一瞬フラッシュしてリロードを再現
+        const topAdEl = document.getElementById('ad-top');
+        const midAdEl = document.getElementById('ad-mid');
+        const botAdEl = document.getElementById('ad-bottom');
+        if (state.adStyle === 'dummy') {
+          if (topAdEl) topAdEl.classList.add('ad-reloading');
+          if (midAdEl) midAdEl.classList.add('ad-reloading');
+          if (botAdEl) botAdEl.classList.add('ad-reloading');
+        }
+
+        const reloadDelay = new Promise(resolve => setTimeout(resolve, 360));
+
+        try {
+          let candidateSet = new Set();
+          state.selectedGens.forEach(genId => {
+            const g = GEN_LIST.find(item => item.id === genId);
+            if (g) {
+              for (let i = g.min; i <= g.max; i++) candidateSet.add(i);
+            }
+          });
+
+          if (state.selectedTypes.size < TYPE_LIST.length) {
+            const typeUnion = new Set();
+            await Promise.all(Array.from(state.selectedTypes).map(async (tEn) => {
+              const ids = await fetchIdsForType(tEn);
+              ids.forEach(id => typeUnion.add(id));
+            }));
+            candidateSet = new Set([...candidateSet].filter(id => typeUnion.has(id)));
+          }
+
+          let pool = Array.from(candidateSet);
+          const picked = [];
+          let forcedSuffix = '';
+
+          // 1. 個別指名固定（最優先）
+          if (rigConfig.active && rigConfig.id) {
+            picked.push(rigConfig.id);
+            forcedSuffix = rigConfig.suffix || '';
+            pool = pool.filter(id => id !== rigConfig.id);
+
+            if (rigConfig.freq === 'once') {
+              resetRigStateOnly();
+            }
+            if (initialSpecialCount > 0) {
+              initialSpecialCount--;
+            }
+          }
+          // 2. デフォルト仕込み：最初の2回は御三家最終進化・準伝説・伝説からランダムに選出
+          else if (initialSpecialCount > 0) {
+            initialSpecialCount--;
+
+            let specialPool = SPECIAL_DEFAULT_POOL.filter(id => candidateSet.has(id));
+            if (specialPool.length === 0) {
+              specialPool = [...SPECIAL_DEFAULT_POOL];
+            }
+
+            while (picked.length < count && specialPool.length > 0) {
+              const idx = Math.floor(Math.random() * specialPool.length);
+              const chosenId = specialPool.splice(idx, 1)[0];
+              picked.push(chosenId);
+              pool = pool.filter(id => id !== chosenId);
+            }
+          }
+
+          // 残りの枠がある場合は通常のランダム抽出で埋める
+          let guard = 0;
+          while (picked.length < count && pool.length > 0 && guard < 80) {
+            guard++;
+            const idx = Math.floor(Math.random() * pool.length);
+            const id = pool.splice(idx, 1)[0];
+
+            if (state.evoFilter !== 'all') {
+              const detail = await fetchPokemonDetail(id);
+              if (!detail) continue;
+              if (state.evoFilter === 'final' && detail.isFinal) picked.push(id);
+              if (state.evoFilter === 'unevolved' && detail.isUnevolved) picked.push(id);
             } else {
-                chosen = POKEMON_DB[Math.floor(Math.random() * POKEMON_DB.length)];
+              picked.push(id);
             }
+          }
 
-            const showImg = document.getElementById('chk-image').checked;
-            const showNum = document.getElementById('chk-number').checked;
+          if (picked.length === 0) {
+            await reloadDelay;
+            renderAds();
+            if (topAdEl) topAdEl.classList.remove('ad-reloading');
+            if (midAdEl) midAdEl.classList.remove('ad-reloading');
+            if (botAdEl) botAdEl.classList.remove('ad-reloading');
+            document.getElementById('result-area').innerHTML = '';
+            showNotice('選択された条件に一致するポケモンが見つかりませんでした。');
+            return;
+          }
 
-            let html = `<div class="bg-white border border-gray-200 rounded p-4 text-center shadow-sm">`;
-            
-            // ★修正：公式アートワークの画像URLを正しく表示するように変更
-            if(showImg) {
-                const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${chosen.id}.png`;
-                html += `<div class="w-52 h-52 mx-auto flex items-center justify-center mb-3">
-                    <img src="${imageUrl}" alt="${chosen.name}" class="max-h-full max-w-full object-contain drop-shadow-md" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${chosen.id}.png';">
-                </div>`;
+          const results = await Promise.all(picked.map((id, i) => fetchPokemonDetail(id, i === 0 ? forcedSuffix : '')));
+          const validResults = results.filter(Boolean);
+
+          await Promise.all([
+            reloadDelay,
+            ...validResults.map(p => preloadImage(p.artwork))
+          ]);
+
+          renderAds();
+          if (topAdEl) topAdEl.classList.remove('ad-reloading');
+          if (midAdEl) midAdEl.classList.remove('ad-reloading');
+          if (botAdEl) botAdEl.classList.remove('ad-reloading');
+
+          lastGenerated = validResults;
+          renderResultCards();
+        } catch (err) {
+          if (topAdEl) topAdEl.classList.remove('ad-reloading');
+          if (midAdEl) midAdEl.classList.remove('ad-reloading');
+          if (botAdEl) botAdEl.classList.remove('ad-reloading');
+          document.getElementById('result-area').innerHTML = '';
+          showNotice('データの読み込み中にエラーが発生しました。再度お試しください。');
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      async function fetchIdsForType(typeEn) {
+        if (typeCache[typeEn]) return typeCache[typeEn];
+        const res = await fetch(`https://pokeapi.co/api/v2/type/${typeEn}`);
+        const data = await res.json();
+        const ids = data.pokemon
+          .map(p => {
+            const m = p.pokemon.url.match(/\/pokemon\/(\d+)\//);
+            return m ? parseInt(m[1], 10) : null;
+          })
+          .filter(id => id && id <= 1025);
+        typeCache[typeEn] = ids;
+        return ids;
+      }
+
+      function buildFallbackSvgDataUrl(id) {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"><circle cx="120" cy="120" r="96" fill="#f3f4f6" stroke="#d1d5db" stroke-width="4"/><path d="M24 120 H216" stroke="#9ca3af" stroke-width="6"/><circle cx="120" cy="120" r="24" fill="#ffffff" stroke="#9ca3af" stroke-width="6"/><text x="120" y="185" font-family="sans-serif" font-size="18" font-weight="bold" fill="#6b7280" text-anchor="middle">#${id}</text></svg>`;
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+      }
+
+      async function fetchPokemonDetail(id, customSuffix = '') {
+        if (pokemonCache[id]) {
+          return { ...pokemonCache[id], customSuffix };
+        }
+
+        const builtin = BUILTIN_SPECIES.find(s => s.id === id);
+
+        try {
+          const [pokeRes, speciesRes] = await Promise.all([
+            fetch(`https://pokeapi.co/api/v2/pokemon/${id}`),
+            fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+          ]);
+          const poke = await pokeRes.json();
+          const species = await speciesRes.json();
+
+          const names = {};
+          species.names.forEach(n => { names[n.language.name] = n.name; });
+          if (!names['ja'] && names['ja-Hrkt']) names['ja'] = names['ja-Hrkt'];
+          if (!names['ja-Hrkt'] && names['ja']) names['ja-Hrkt'] = names['ja'];
+          if (builtin && !names['ja-Hrkt']) names['ja-Hrkt'] = builtin.ja;
+
+          const jaFlavor = species.flavor_text_entries.find(f => f.language.name === 'ja' || f.language.name === 'ja-Hrkt');
+          const enFlavor = species.flavor_text_entries.find(f => f.language.name === 'en');
+          const flavor = (jaFlavor ? jaFlavor.flavor_text : (enFlavor ? enFlavor.flavor_text : '')).replace(/[\n\f\r]/g, ' ');
+
+          const jaGenus = species.genera.find(g => g.language.name === 'ja' || g.language.name === 'ja-Hrkt');
+          const genus = jaGenus ? jaGenus.genus : '-';
+
+          const types = poke.types.sort((a, b) => a.slot - b.slot).map(t => t.type.name);
+          const isUnevolved = !species.evolves_from_species;
+
+          let isFinal = true;
+          try {
+            if (species.evolution_chain && species.evolution_chain.url) {
+              const evoRes = await fetch(species.evolution_chain.url);
+              const evoJson = await evoRes.json();
+              const resFinal = checkFinalInChain(evoJson.chain, species.name);
+              if (resFinal !== null) isFinal = resFinal;
             }
+          } catch (e) {}
 
-            let infoText = "";
-            if(showNum) infoText += `#${chosen.id} `;
-            infoText += chosen.name;
-            html += `<div class="text-xl font-bold text-gray-800">${infoText}</div>`;
-            html += `</div>`;
+          const detail = {
+            id,
+            names,
+            types,
+            flavor,
+            genus,
+            height: (poke.height / 10).toFixed(1) + ' m',
+            weight: (poke.weight / 10).toFixed(1) + ' kg',
+            isFinal,
+            isUnevolved,
+            artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+            fallbackSvg: buildFallbackSvgDataUrl(id),
+            shinyArtwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`
+          };
 
-            const resContainer = document.getElementById('result-container');
-            resContainer.innerHTML = html;
-            resContainer.classList.remove('hidden');
+          pokemonCache[id] = detail;
+          return { ...detail, customSuffix };
+        } catch (e) {
+          const fallback = {
+            id,
+            names: {
+              'ja-Hrkt': builtin ? builtin.ja : `ポケモン #${id}`,
+              'en': builtin ? builtin.en : `Pokemon #${id}`
+            },
+            types: ['normal'],
+            flavor: '図鑑データを取得できませんでした。',
+            genus: '-',
+            height: '-',
+            weight: '-',
+            isFinal: true,
+            isUnevolved: true,
+            artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+            fallbackSvg: buildFallbackSvgDataUrl(id),
+            shinyArtwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`
+          };
+          return { ...fallback, customSuffix };
+        }
+      }
+
+      function checkFinalInChain(node, targetName) {
+        if (node.species.name === targetName) return node.evolves_to.length === 0;
+        for (const child of node.evolves_to) {
+          const res = checkFinalInChain(child, targetName);
+          if (res !== null) return res;
+        }
+        return null;
+      }
+
+      function getNameInSelectedLang(p) {
+        const langObj = NAME_LANGS.find(l => l.key === state.nameLang) || NAME_LANGS[0];
+        const base = p.names[langObj.api] || p.names['ja-Hrkt'] || p.names['en'] || `#${p.id}`;
+        return base + (p.customSuffix || '');
+      }
+
+      function getTypeLabelInSelectedLang(typeEn) {
+        const t = TYPE_LIST.find(item => item.en === typeEn);
+        if (!t) return typeEn;
+        return t[state.nameLang] || t.ja;
+      }
+
+      function renderResultCards() {
+        const area = document.getElementById('result-area');
+        if (!area) return;
+
+        if (!lastGenerated || lastGenerated.length === 0) {
+          area.innerHTML = '';
+          return;
         }
 
-        function toggleDropdown(type) {
-            ['gen', 'type', 'name', 'evo'].forEach(t => {
-                const el = document.getElementById(`dropdown-${t}`);
-                if(t === type) {
-                    el.classList.toggle('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
-            });
+        if (lastGenerated.length === 1) {
+          const p = lastGenerated[0];
+          const name = getNameInSelectedLang(p);
+          const label = state.showNumber ? `#${p.id} ${name}` : name;
+
+          area.innerHTML = `
+            <div data-detail-id="${p.id}" class="result-reveal cursor-pointer">
+              ${state.showImage ? `
+                <div class="w-full flex justify-center my-2">
+                  <img src="${p.artwork}" alt="${name}" class="w-[245px] h-[245px] object-contain" onerror="this.onerror=null;this.src='${p.fallbackSvg}'">
+                </div>
+              ` : ''}
+              <div class="mt-3 text-[0.98rem] text-[#333333] font-normal tracking-tight">
+                ${label}
+              </div>
+            </div>
+          `;
+          return;
         }
 
-        function setupDropdowns() {
-            document.getElementById('dropdown-gen').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> 第一世代 (#1-151)</label>`;
-            document.getElementById('dropdown-type').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべて</label>`;
-            document.getElementById('dropdown-name').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="radio" name="lang" checked> 日本語</label>`;
-            document.getElementById('dropdown-evo').innerHTML = `<label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer gap-2"><input type="checkbox" class="custom-checkbox" checked> すべての進化段階</label>`;
+        area.innerHTML = `
+          <div class="grid grid-cols-2 gap-x-4 gap-y-6">
+            ${lastGenerated.map(p => {
+              const name = getNameInSelectedLang(p);
+              const label = state.showNumber ? `#${p.id} ${name}` : name;
+              return `
+                <div data-detail-id="${p.id}" class="result-reveal cursor-pointer flex flex-col">
+                  ${state.showImage ? `
+                    <div class="w-full flex justify-center my-1">
+                      <img src="${p.artwork}" alt="${name}" class="w-36 h-36 object-contain" onerror="this.onerror=null;this.src='${p.fallbackSvg}'">
+                    </div>
+                  ` : ''}
+                  <div class="mt-1.5 text-[0.9rem] text-[#333333]">
+                    ${label}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 5. 詳細モーダル & フッターモーダル
+      // =========================================================================
+      async function openDetailModal(id) {
+        const data = await fetchPokemonDetail(id);
+        if (!data) return;
+        currentDetailData = data;
+
+        document.getElementById('detail-dex-num').textContent = `#${data.id}`;
+        document.getElementById('detail-poke-name').textContent = getNameInSelectedLang(data);
+        document.getElementById('detail-alt-names').textContent = `日本語: ${data.names['ja-Hrkt'] || '-'} / English: ${data.names['en'] || '-'}`;
+        document.getElementById('detail-types').innerHTML = data.types
+          .map(tEn => `<span class="type-pill type-${tEn}">${getTypeLabelInSelectedLang(tEn)}</span>`)
+          .join('');
+
+        setDetailShiny(false);
+        document.getElementById('detail-flavor').textContent = data.flavor || '図鑑説明がありません。';
+        document.getElementById('detail-genus').textContent = data.genus;
+        document.getElementById('detail-height').textContent = data.height;
+        document.getElementById('detail-weight').textContent = data.weight;
+
+        const modal = document.getElementById('detail-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function setDetailShiny(isShiny) {
+        if (!currentDetailData) return;
+        const img = document.getElementById('detail-artwork');
+        const btnN = document.getElementById('btn-detail-normal');
+        const btnS = document.getElementById('btn-detail-shiny');
+
+        if (isShiny) {
+          img.src = currentDetailData.shinyArtwork;
+          btnS.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-amber-500 text-white cursor-pointer';
+          btnN.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-white text-gray-700 border border-gray-300 cursor-pointer';
+        } else {
+          img.src = currentDetailData.artwork;
+          btnN.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-[#5a5a5a] text-white cursor-pointer';
+          btnS.className = 'px-3 py-1 text-xs font-semibold rounded-full bg-white text-gray-700 border border-gray-300 cursor-pointer';
+        }
+      }
+
+      function closeDetailModal() {
+        const modal = document.getElementById('detail-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function openInfoModal(type) {
+        const titleEl = document.getElementById('info-modal-title');
+        const bodyEl = document.getElementById('info-modal-body');
+
+        if (type === 'usage') {
+          titleEl.textContent = '使い方';
+          bodyEl.innerHTML = `
+            <p>「世代」「タイプ」「進化」などの条件を選択し、青い「発生」ボタンを押すとランダムにポケモンが表示されます。</p>
+            <p>横の数字ボックスを変更すると、一度に1〜6匹まで発生させることができます。</p>
+            <p>「画像」「ナンバー」のチェックボックスや「名前」の言語設定は、発生後でもリアルタイムで切り替え可能です。</p>
+          `;
+        } else {
+          titleEl.textContent = type === 'contact' ? 'Contact us' : type === 'legal' ? 'Legal Notice' : 'Privacy Policy';
+          bodyEl.innerHTML = `
+            <p>Pokémon and Pokémon character names are trademarks of Nintendo / Creatures Inc. / GAME FREAK inc.</p>
+            <p>Data provided by PokéAPI.</p>
+          `;
         }
 
-        function toggleDisplay(type) {}
+        const modal = document.getElementById('info-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
 
-        function openSecretModal() {
-            document.getElementById('secret-modal').classList.remove('hidden');
-        }
-        function closeSecretModal() {
-            document.getElementById('secret-modal').classList.add('hidden');
-        }
-        function applySecretSetting() {
-            const val = document.getElementById('secret-input-name').value.trim();
-            if(val) {
-                fixedPokemonName = val;
-                document.getElementById('secret-status-bar').classList.remove('hidden');
-                document.getElementById('fixed-target-name').innerText = fixedPokemonName;
+      function closeInfoModal() {
+        const modal = document.getElementById('info-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // =========================================================================
+      // 6. ステルス仕込み機能（タイトル3回タップ / 1.2秒長押し / Shift+P / 広告タップ解除）
+      // =========================================================================
+      function toKatakana(str) {
+        return str.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+      }
+
+      function loadRigFromStorage() {
+        try {
+          const raw = localStorage.getItem(RIG_STORAGE_KEY);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved) {
+              if (saved.adStyle) state.adStyle = saved.adStyle;
+              if (saved.active && saved.id) {
+                rigConfig = saved;
+              }
             }
-            closeSecretModal();
+          }
+        } catch (e) {}
+      }
+
+      function applyUrlQueryRig() {
+        const params = new URLSearchParams(window.location.search);
+        const fix = params.get('fix') || params.get('pokemon');
+        const idStr = params.get('id');
+        const freq = params.get('freq') === 'always' ? 'always' : 'once';
+        const suffix = params.get('suffix') || '';
+
+        if (idStr) {
+          const num = parseInt(idStr, 10);
+          if (num >= 1 && num <= 1025) {
+            const found = speciesList.find(s => s.id === num);
+            rigConfig = { active: true, id: num, name: found ? found.ja : `No.${num}`, freq, suffix };
+          }
+        } else if (fix) {
+          const qKata = toKatakana(fix.trim());
+          const found = speciesList.find(s =>
+            toKatakana(s.ja) === qKata ||
+            s.en.toLowerCase() === fix.trim().toLowerCase() ||
+            toKatakana(s.ja).includes(qKata)
+          );
+          if (found) {
+            rigConfig = { active: true, id: found.id, name: found.ja, freq, suffix };
+          }
         }
-        function resetSecretMode() {
-            fixedPokemonName = "";
-            document.getElementById('secret-status-bar').classList.add('hidden');
+      }
+
+      function openSecretModal() {
+        syncSecretModal();
+        const modal = document.getElementById('secret-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeSecretModal() {
+        const modal = document.getElementById('secret-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.getElementById('secret-suggest-list').classList.add('hidden');
+      }
+
+      function syncSecretModal() {
+        const status = document.getElementById('secret-status-text');
+        const input = document.getElementById('secret-search-input');
+        const suffixInput = document.getElementById('secret-suffix-input');
+        const badgeEl = document.getElementById('starter-legend-badge');
+
+        if (badgeEl) {
+          badgeEl.textContent = initialSpecialCount > 0
+            ? `ON（残り ${initialSpecialCount} 回）`
+            : 'OFF（解除済み）';
+          badgeEl.className = initialSpecialCount > 0
+            ? 'text-xs font-bold text-[#007bff]'
+            : 'text-xs font-bold text-gray-500';
         }
-    </script>
+
+        document.querySelectorAll('input[name="ad-style"]').forEach(r => {
+          r.checked = (r.value === state.adStyle);
+        });
+
+        const targetFreq = rigConfig.active ? rigConfig.freq : 'once';
+        document.querySelectorAll('input[name="rig-freq"]').forEach(r => {
+          r.checked = (r.value === targetFreq);
+        });
+
+        if (rigConfig.active && rigConfig.id) {
+          const freqTxt = rigConfig.freq === 'once' ? '1回のみ' : '毎回固定';
+          status.textContent = `個別指名: #${rigConfig.id} ${rigConfig.name}（${freqTxt}）`;
+          input.value = rigConfig.name;
+          suffixInput.value = rigConfig.suffix || '';
+          pendingRigCandidate = { id: rigConfig.id, name: rigConfig.name };
+        } else {
+          status.textContent = '個別指名: なし';
+          input.value = '';
+          suffixInput.value = '';
+          pendingRigCandidate = null;
+        }
+      }
+
+      function onSecretSearchInput() {
+        const val = document.getElementById('secret-search-input').value.trim();
+        const list = document.getElementById('secret-suggest-list');
+        if (!val) {
+          list.classList.add('hidden');
+          pendingRigCandidate = null;
+          return;
+        }
+
+        let matches = [];
+        if (/^\d+$/.test(val)) {
+          const num = parseInt(val, 10);
+          if (num >= 1 && num <= 1025) {
+            const found = speciesList.find(s => s.id === num);
+            matches = found ? [found] : [{ id: num, ja: `ポケモン No.${num}`, en: '' }];
+          }
+        } else {
+          const qKata = toKatakana(val);
+          const qLow = val.toLowerCase();
+          matches = speciesList.filter(s =>
+            toKatakana(s.ja).includes(qKata) || s.en.toLowerCase().includes(qLow)
+          ).slice(0, 15);
+        }
+
+        if (matches.length === 0) {
+          list.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400">一致するポケモンが見つかりません（図鑑No. 1〜1025 でも直接指定できます）</li>';
+        } else {
+          list.innerHTML = matches.map(m => `
+            <li data-cand-id="${m.id}" data-cand-name="${m.ja}" class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center justify-between border-b border-gray-100 last:border-none">
+              <span class="font-bold text-xs text-gray-800">${m.ja} <span class="text-gray-400 font-normal">${m.en ? `(${m.en})` : ''}</span></span>
+              <span class="font-mono text-xs text-gray-400">#${m.id}</span>
+            </li>
+          `).join('');
+        }
+        list.classList.remove('hidden');
+      }
+
+      function saveRigConfig() {
+        const raw = document.getElementById('secret-search-input').value.trim();
+        const freqEl = document.querySelector('input[name="rig-freq"]:checked');
+        const freq = freqEl ? freqEl.value : 'once';
+        const suffix = document.getElementById('secret-suffix-input').value;
+        const adEl = document.querySelector('input[name="ad-style"]:checked');
+        const adStyle = adEl ? adEl.value : 'dummy';
+
+        state.adStyle = adStyle;
+        renderAds();
+
+        if (!pendingRigCandidate && raw) {
+          if (/^\d+$/.test(raw)) {
+            const num = parseInt(raw, 10);
+            if (num >= 1 && num <= 1025) {
+              const found = speciesList.find(s => s.id === num);
+              pendingRigCandidate = { id: num, name: found ? found.ja : `No.${num}` };
+            }
+          } else {
+            const qKata = toKatakana(raw);
+            const found = speciesList.find(s => toKatakana(s.ja) === qKata) ||
+                          speciesList.find(s => toKatakana(s.ja).includes(qKata));
+            if (found) pendingRigCandidate = { id: found.id, name: found.ja };
+          }
+        }
+
+        if (pendingRigCandidate && freq !== 'off') {
+          rigConfig = {
+            active: true,
+            id: pendingRigCandidate.id,
+            name: pendingRigCandidate.name,
+            freq,
+            suffix
+          };
+        } else {
+          rigConfig = { active: false, id: null, name: '', freq: 'once', suffix: '' };
+        }
+
+        try {
+          localStorage.setItem(RIG_STORAGE_KEY, JSON.stringify({ ...rigConfig, adStyle: state.adStyle }));
+        } catch (e) {}
+        closeSecretModal();
+      }
+
+      function resetRigStateOnly() {
+        rigConfig = { active: false, id: null, name: '', freq: 'once', suffix: '' };
+        pendingRigCandidate = null;
+        try {
+          localStorage.setItem(RIG_STORAGE_KEY, JSON.stringify({ ...rigConfig, adStyle: state.adStyle }));
+        } catch (e) {}
+      }
+
+      function clearRigConfig() {
+        initialSpecialCount = 0;
+        resetRigStateOnly();
+        syncSecretModal();
+        closeSecretModal();
+      }
+
+      function showNotice(msg) {
+        const box = document.getElementById('notice-box');
+        if (box) {
+          box.textContent = msg;
+          box.classList.remove('hidden');
+        }
+      }
+
+      function hideNotice() {
+        const box = document.getElementById('notice-box');
+        if (box) box.classList.add('hidden');
+      }
+
+      // =========================================================================
+      // 7. 全イベントリスナー登録 & 確実な初期化
+      // =========================================================================
+      function bindEvents() {
+        // タイトル上の広告タップで「最初の2回（御三家最終・準伝・伝説）」を無言解除
+        const topAdEl = document.getElementById('ad-top');
+        if (topAdEl) {
+          topAdEl.addEventListener('click', () => {
+            if (initialSpecialCount > 0) {
+              initialSpecialCount = 0;
+            }
+          });
+        }
+
+        document.getElementById('btn-opt-image').addEventListener('click', () => {
+          state.showImage = !state.showImage;
+          document.getElementById('cb-image').classList.toggle('checked', state.showImage);
+          renderResultCards();
+        });
+
+        document.getElementById('btn-opt-number').addEventListener('click', () => {
+          state.showNumber = !state.showNumber;
+          document.getElementById('cb-number').classList.toggle('checked', state.showNumber);
+          renderResultCards();
+        });
+
+        ['gen', 'type', 'name', 'evo'].forEach(key => {
+          document.getElementById(`btn-${key}`).addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu(key);
+          });
+        });
+
+        document.getElementById('list-gen').addEventListener('click', (e) => {
+          const item = e.target.closest('[data-gen-id]');
+          if (!item) return;
+          const id = parseInt(item.getAttribute('data-gen-id'), 10);
+          if (state.selectedGens.has(id)) state.selectedGens.delete(id);
+          else state.selectedGens.add(id);
+          renderDropdownLists();
+        });
+
+        document.getElementById('btn-gen-all').addEventListener('click', () => {
+          if (state.selectedGens.size === GEN_LIST.length) state.selectedGens.clear();
+          else GEN_LIST.forEach(g => state.selectedGens.add(g.id));
+          renderDropdownLists();
+        });
+
+        document.getElementById('list-type').addEventListener('click', (e) => {
+          const item = e.target.closest('[data-type-en]');
+          if (!item) return;
+          const en = item.getAttribute('data-type-en');
+          if (state.selectedTypes.has(en)) state.selectedTypes.delete(en);
+          else state.selectedTypes.add(en);
+          renderDropdownLists();
+        });
+
+        document.getElementById('btn-type-all').addEventListener('click', () => {
+          if (state.selectedTypes.size === TYPE_LIST.length) state.selectedTypes.clear();
+          else TYPE_LIST.forEach(t => state.selectedTypes.add(t.en));
+          renderDropdownLists();
+        });
+
+        document.getElementById('list-name').addEventListener('click', (e) => {
+          const item = e.target.closest('[data-lang-key]');
+          if (!item) return;
+          state.nameLang = item.getAttribute('data-lang-key');
+          renderDropdownLists();
+          closeAllMenus();
+          renderResultCards();
+        });
+
+        document.getElementById('list-evo').addEventListener('click', (e) => {
+          const item = e.target.closest('[data-evo-key]');
+          if (!item) return;
+          state.evoFilter = item.getAttribute('data-evo-key');
+          renderDropdownLists();
+          closeAllMenus();
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!state.openMenu) return;
+          const wrap = document.getElementById(`wrap-${state.openMenu}`);
+          if (wrap && !wrap.contains(e.target)) {
+            closeAllMenus();
+          }
+        });
+
+        document.getElementById('btn-generate').addEventListener('click', handleGenerateClick);
+
+        document.getElementById('result-area').addEventListener('click', (e) => {
+          const card = e.target.closest('[data-detail-id]');
+          if (card) {
+            const id = parseInt(card.getAttribute('data-detail-id'), 10);
+            openDetailModal(id);
+          }
+        });
+
+        document.getElementById('footer-langs').addEventListener('click', (e) => {
+          const link = e.target.closest('[data-lang]');
+          if (!link) return;
+          const lang = link.getAttribute('data-lang');
+          if (NAME_LANGS.some(l => l.key === lang)) {
+            state.nameLang = lang;
+            renderDropdownLists();
+            renderResultCards();
+          }
+        });
+
+        document.querySelectorAll('[data-info]').forEach(el => {
+          el.addEventListener('click', () => openInfoModal(el.getAttribute('data-info')));
+        });
+
+        document.getElementById('detail-modal').addEventListener('click', closeDetailModal);
+        document.getElementById('btn-close-detail').addEventListener('click', closeDetailModal);
+        document.getElementById('btn-detail-normal').addEventListener('click', () => setDetailShiny(false));
+        document.getElementById('btn-detail-shiny').addEventListener('click', () => setDetailShiny(true));
+
+        document.getElementById('info-modal').addEventListener('click', closeInfoModal);
+        document.getElementById('btn-close-info').addEventListener('click', closeInfoModal);
+
+        // ステルス仕込み設定トリガー（タイトル3回タップ / 1.2秒長押し / Shift+P）
+        const titleEl = document.getElementById('secret-title-trigger');
+        let tapCount = 0;
+        let tapTimer = null;
+        let holdTimer = null;
+
+        titleEl.addEventListener('click', () => {
+          tapCount++;
+          clearTimeout(tapTimer);
+          if (tapCount >= 3) {
+            tapCount = 0;
+            openSecretModal();
+          } else {
+            tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+          }
+        });
+
+        titleEl.addEventListener('touchstart', () => {
+          holdTimer = setTimeout(() => { openSecretModal(); }, 1200);
+        }, { passive: true });
+        titleEl.addEventListener('touchend', () => clearTimeout(holdTimer));
+        titleEl.addEventListener('mousedown', () => {
+          holdTimer = setTimeout(() => { openSecretModal(); }, 1200);
+        });
+        titleEl.addEventListener('mouseup', () => clearTimeout(holdTimer));
+
+        document.addEventListener('keydown', (e) => {
+          if (e.shiftKey && (e.key === 'P' || e.key === 'p')) {
+            if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
+              e.preventDefault();
+              openSecretModal();
+            }
+          }
+        });
+
+        document.getElementById('secret-modal').addEventListener('click', closeSecretModal);
+        document.getElementById('btn-close-secret').addEventListener('click', closeSecretModal);
+        document.getElementById('secret-search-input').addEventListener('input', onSecretSearchInput);
+        document.getElementById('secret-suggest-list').addEventListener('click', (e) => {
+          const item = e.target.closest('[data-cand-id]');
+          if (!item) return;
+          const id = parseInt(item.getAttribute('data-cand-id'), 10);
+          const name = item.getAttribute('data-cand-name');
+          pendingRigCandidate = { id, name };
+          document.getElementById('secret-search-input').value = name;
+          document.getElementById('secret-suggest-list').classList.add('hidden');
+          document.getElementById('secret-status-text').textContent = `選択候補: #${id} ${name}`;
+        });
+
+        document.getElementById('btn-reset-starter-legend').addEventListener('click', () => {
+          initialSpecialCount = 2;
+          syncSecretModal();
+        });
+        document.getElementById('btn-disable-starter-legend').addEventListener('click', () => {
+          initialSpecialCount = 0;
+          syncSecretModal();
+        });
+
+        document.getElementById('btn-save-rig').addEventListener('click', saveRigConfig);
+        document.getElementById('btn-clear-rig').addEventListener('click', clearRigConfig);
+      }
+
+      function init() {
+        loadRigFromStorage();
+        applyUrlQueryRig();
+        renderDropdownLists();
+        renderAds();
+        bindEvents();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
 </body>
 </html>
